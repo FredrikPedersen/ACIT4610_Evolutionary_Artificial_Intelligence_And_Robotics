@@ -1,67 +1,100 @@
-import PyCX.pycxsimulator as pycx
 from pylab import *
 
-areaDimensions: int = 10
+import PyCX.pycxsimulator as pycx
+from CovidModelling.person import Person
+from CovidModelling.infectionState import InfectionState
+
+areaDimensions: int = 100
 initProb: float = 0.01
 infectionRate: float = 0.5
 recoveryRate: float = 0.15
+mortalityRate: float = 0.02
 
 
 def initialize():
-    global time, config, nextConfig
+    global time, stateConfig, nextStateConfig, people
 
     time = 0
 
-    config = zeros([areaDimensions, areaDimensions])
+    stateConfig = zeros([areaDimensions, areaDimensions], int)
+    people = [[None for i in range(areaDimensions)] for j in range(areaDimensions)]
+
     for posX in range(areaDimensions):
         for posY in range(areaDimensions):
             if random() < initProb:
-                state = 2   # Infected
+                state: InfectionState = InfectionState.Infected   # Infected
             else:
-                state = 1   # Healthy
+                state: InfectionState = InfectionState.Healthy  # Healthy
 
-            config[posY, posX] = state
+            stateConfig[posY, posX] = state.value
+            people[posY][posX] = (Person(state))
 
-    nextConfig = zeros([areaDimensions, areaDimensions])
+    nextStateConfig = zeros([areaDimensions, areaDimensions])
 
 
 def observe():
     cla()
-    imshow(config, vmin=0, vmax=2, cmap=cm.jet)
+    imshow(stateConfig, vmin=0, vmax=len(InfectionState), cmap=cm.jet)
     axis('image')
     title('t = ' + str(time))
 
 
 def update():
-    global time, config, nextConfig
+    global time, stateConfig, nextStateConfig, people
 
-    time += 1
+    time += 1   # Update step
 
-    for x in range(areaDimensions):
-        for y in range(areaDimensions):
+    for posX in range(areaDimensions):
+        for posY in range(areaDimensions):
 
-            state = config[y, x]
+            person: Person = people[posY][posX]
 
-            if state == 0:
-                for dx in range(-1, 2):
-                    for dy in range(-1, 2):
-                        if config[(y + dy) % areaDimensions, (x + dx) % areaDimensions] == 1:
-                            if random() < recoveryRate:
-                                state = 1
+            # If a person is dead, check if it's neighbours are healthy. If they are, regrow this person if we roll
+            # a random number lower than the recovery rate.
+            if person.get_state() == InfectionState.Recovering:
+                if __iterate_neighbourhood(InfectionState.Healthy, posY, posX):
+                    person.set_state(InfectionState.Healthy)
 
-            elif state == 1:
-                for dx in range(-1, 2):
-                    for dy in range(-1, 2):
-                        if config[(y + dy) % areaDimensions, (x + dx) % areaDimensions] == 2:
-                            if random() < infectionRate:
-                                state = 2
+            # If a person is healthy, check if any of it's neighbours are infectded. If they are, infect this person if
+            # we roll a random number lower than the infection rate.
+            elif person.get_state() == InfectionState.Healthy:
+                if __iterate_neighbourhood(InfectionState.Infected, posY, posX):
+                    person.set_state(InfectionState.Infected)
 
+            # If a person is neither dead nor healthy, make it Recovering.
             else:
-                state = 0   # Dead/Recovering
+                person.set_state(InfectionState.Recovering)
 
-            nextConfig[y, x] = state
+            nextStateConfig[posY, posX] = person.get_state().value
 
-    config, nextConfig = nextConfig, config
+    stateConfig, nextStateConfig = nextStateConfig, stateConfig
+
+
+def __iterate_neighbourhood(neighbourhood_state: InfectionState, pos_y: int, pos_x: int):
+    """
+    Iterates through the neighbourhood of the current cell located at (pos_y, pos_x). If anyone
+    in the neighbourhood has the desired state, roll a random number and compare it to the rate belonging
+     to the InfectionState (I.e compare the random number to the Infection Rate if we are checking for infected
+     neighbours) too see if the current cell should be updated.
+
+    :param neighbourhood_state: The state we want to find out if anyone in the neighbourhood has
+    :param pos_y: Y-coordinate of the current cell
+    :param pos_x: X-coordinate of the current cell
+    :return: True if the cell should be updated, false if not.
+    """
+    control_rate: float
+
+    if neighbourhood_state == InfectionState.Infected:
+        control_rate = infectionRate
+    elif neighbourhood_state == InfectionState.Healthy:
+        control_rate = recoveryRate
+
+    for dx in range(-1, 2):
+        for dy in range(-1, 2):
+            if stateConfig[(pos_y + dy) % areaDimensions, (pos_x + dx) % areaDimensions] == neighbourhood_state.value:
+                if random() < control_rate:
+                    return True
+    return False
 
 
 pycx.GUI().start(func=[initialize, observe, update])
