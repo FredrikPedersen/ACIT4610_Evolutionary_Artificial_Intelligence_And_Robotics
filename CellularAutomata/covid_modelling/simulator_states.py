@@ -1,8 +1,8 @@
 from pylab import *
 
-import PyCX.pycxsimulator as pycx
-from CovidModelling.person import Person
-from CovidModelling.infectionState import InfectionState
+import pycx.pycxsimulator as pycx
+from covid_modelling.infection_state import InfectionState
+from covid_modelling.person import Person
 
 areaDimensions: int = 100
 initProb: float = 0.01
@@ -22,9 +22,9 @@ def initialize():
     for posX in range(areaDimensions):
         for posY in range(areaDimensions):
             if random() < initProb:
-                state: InfectionState = InfectionState.Infected   # Infected
+                state: InfectionState = InfectionState.Infected
             else:
-                state: InfectionState = InfectionState.Healthy  # Healthy
+                state: InfectionState = InfectionState.Healthy
 
             stateConfig[posY, posX] = state.value
             people[posY][posX] = (Person(state))

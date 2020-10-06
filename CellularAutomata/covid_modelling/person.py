@@ -1,5 +1,5 @@
 from typing import Tuple
-from CovidModelling.infectionState import InfectionState
+from covid_modelling.infection_state import InfectionState
 
 
 class Person:
