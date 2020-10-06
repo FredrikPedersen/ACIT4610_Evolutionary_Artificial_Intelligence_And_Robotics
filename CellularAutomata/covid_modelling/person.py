@@ -1,4 +1,3 @@
-from typing import Tuple
 from covid_modelling.infection_state import InfectionState
 
 

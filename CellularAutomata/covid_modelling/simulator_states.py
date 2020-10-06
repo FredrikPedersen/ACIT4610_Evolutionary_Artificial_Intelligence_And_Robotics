@@ -7,7 +7,6 @@ from covid_modelling.person import Person
 areaDimensions: int = 100
 initProb: float = 0.01
 infectionRate: float = 0.5
-recoveryRate: float = 0.15
 mortalityRate: float = 0.02
 
 
@@ -21,6 +20,7 @@ def initialize():
 
     for posX in range(areaDimensions):
         for posY in range(areaDimensions):
+
             if random() < initProb:
                 state: InfectionState = InfectionState.Infected
             else:
@@ -42,28 +42,30 @@ def observe():
 def update():
     global time, stateConfig, nextStateConfig, people
 
-    time += 1   # Update step
+    time += 1
 
     for posX in range(areaDimensions):
         for posY in range(areaDimensions):
 
             person: Person = people[posY][posX]
+            current_infection_state: InfectionState = person.get_state()
 
-            # If a person is dead, check if it's neighbours are healthy. If they are, regrow this person if we roll
-            # a random number lower than the recovery rate.
-            if person.get_state() == InfectionState.Recovering:
-                if __iterate_neighbourhood(InfectionState.Healthy, posY, posX):
-                    person.set_state(InfectionState.Healthy)
+            # Dead people stay dead, recovered patients don't catch the disease over again
+            if (current_infection_state != InfectionState.Dead) and (current_infection_state != InfectionState.Recovered):
 
-            # If a person is healthy, check if any of it's neighbours are infectded. If they are, infect this person if
-            # we roll a random number lower than the infection rate.
-            elif person.get_state() == InfectionState.Healthy:
-                if __iterate_neighbourhood(InfectionState.Infected, posY, posX):
-                    person.set_state(InfectionState.Infected)
+                # If a person is healthy, check if any of it's neighbours are infected. If they are, infect this person
+                # if we roll a random number lower than the infection rate.
+                if current_infection_state == InfectionState.Healthy:
+                    if __iterate_neighbourhood(InfectionState.Infected, posY, posX):
+                        person.set_state(InfectionState.Infected)
 
-            # If a person is neither dead nor healthy, make it Recovering.
-            else:
-                person.set_state(InfectionState.Recovering)
+                # If a person is infected, roll a random number and compare to mortality rate. If the person survives,
+                # Make it recovered
+                elif current_infection_state == InfectionState.Infected:
+                    if random() < mortalityRate:
+                        person.set_state(InfectionState.Dead)
+                    else:
+                        person.set_state(InfectionState.Recovered)
 
             nextStateConfig[posY, posX] = person.get_state().value
 
@@ -86,8 +88,6 @@ def __iterate_neighbourhood(neighbourhood_state: InfectionState, pos_y: int, pos
 
     if neighbourhood_state == InfectionState.Infected:
         control_rate = infectionRate
-    elif neighbourhood_state == InfectionState.Healthy:
-        control_rate = recoveryRate
 
     for dx in range(-1, 2):
         for dy in range(-1, 2):
