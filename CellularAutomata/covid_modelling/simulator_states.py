@@ -71,22 +71,37 @@ def update():
 
     stateConfig, nextStateConfig = nextStateConfig, stateConfig
 
+    if timeStep == 80:
+        __calculate_mortality()
+
+
+# For testing purposes, delete later
+def __calculate_mortality():
+
+    entities = 0
+    dead = 0
+    for row in range(len(people)):
+        for column in range(len(people[row])):
+            entities += 1
+            if people[row][column].get_state() == HealthState.Dead:
+                dead += 1
+
+    print(dead / entities)
+
 
 def __handle_infected_person(person: Person) -> None:
     infection_duration = person.get_infection().get_duration()
 
-    # Realistically, a person shouldn't die before having had the symptoms for a while.
-    # Using an arbitrary number of 5 days of having symptoms before a person is in danger of dying, which is quite
-    # ridiculous if we are going to be realistic. Try introducing a "danger zone" which is set higher than 4 later,
-    # then make it lower if the person is very young or old to better reflect reality.
-    if (infection_duration > Constants.INCUBATION_DURATION + 5) and random() < Constants.MORTALITY_RATE:
+    # Currently only old people die according to our model, introduce variables for checking if a person has other
+    # Health problems as well.
+    if person.get_age() > 60 and random() < Constants.MORTALITY_RATE:
         person.become_dead()
         return
 
     # An infected person has a chance of recovering after they have been sick for the average duration of COVID-19, and
     # they roll a sufficient random number. Chances of going into recovery becomes higher the longer they are sick.
     elif infection_duration >= Constants.AVERAGE_DURATION \
-            and random() < (Constants.RECOVERY_CHANCE + (infection_duration - Constants.INCUBATION_DURATION)/10):
+            and random() < (Constants.RECOVERY_CHANCE + (infection_duration - Constants.INCUBATION_DURATION)/200):
         person.become_recovered()
         return
 
@@ -111,6 +126,7 @@ def __handle_healthy_person(person: Person, pos_y: int, pos_x: int) -> None:
 
             if stateConfig[y, x] == HealthState.Infected.value:
 
+                #TODO THERE IS A BUG HERE WHERE EITHER AN UNINFECTED OR DEAD PERSON IS BEING CHECKED FOR BEING INFECTIOUS
                 # The neighbour must be in an infectious phase of the disease to infect someone
                 if random() < Constants.INFECTION_RATE and people[y][x].get_infection().get_infectious():
                     person.become_infected()
