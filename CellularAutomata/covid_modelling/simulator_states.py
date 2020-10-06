@@ -1,10 +1,11 @@
 from pylab import *
 
 import pycx.pycxsimulator as pycx
-from covid_modelling.infection_state import InfectionState
+from covid_modelling.health_state import HealthState
 from covid_modelling.person import Person
+from covid_modelling.infection import Infection
 
-areaDimensions: int = 100
+areaDimensions: int = 50
 initProb: float = 0.01
 infectionRate: float = 0.5
 mortalityRate: float = 0.02
@@ -16,25 +17,26 @@ def initialize():
     time = 0
 
     stateConfig = zeros([areaDimensions, areaDimensions], int)
-    people = [[None for i in range(areaDimensions)] for j in range(areaDimensions)]
+    people = [[None for i in range(areaDimensions)] for j in range(areaDimensions)]     # numpy does not support objects
 
     for posX in range(areaDimensions):
         for posY in range(areaDimensions):
 
             if random() < initProb:
-                state: InfectionState = InfectionState.Infected
+                state: HealthState = HealthState.Infected
+                people[posY][posX] = (Person(state, Infection()))
             else:
-                state: InfectionState = InfectionState.Healthy
+                state: HealthState = HealthState.Healthy
+                people[posY][posX] = (Person(state))
 
             stateConfig[posY, posX] = state.value
-            people[posY][posX] = (Person(state))
 
     nextStateConfig = zeros([areaDimensions, areaDimensions])
 
 
 def observe():
     cla()
-    imshow(stateConfig, vmin=0, vmax=len(InfectionState), cmap=cm.jet)
+    imshow(stateConfig, vmin=0, vmax=len(HealthState), cmap=cm.jet)
     axis('image')
     title('t = ' + str(time))
 
@@ -48,31 +50,31 @@ def update():
         for posY in range(areaDimensions):
 
             person: Person = people[posY][posX]
-            current_infection_state: InfectionState = person.get_state()
+            current_health_state: HealthState = person.get_state()
 
-            # Dead people stay dead, recovered patients don't catch the disease over again
-            if (current_infection_state != InfectionState.Dead) and (current_infection_state != InfectionState.Recovered):
+            # Dead people stay dead, recovered patients don't contract the disease over again
+            if (current_health_state != HealthState.Dead) and (current_health_state != HealthState.Recovered):
 
                 # If a person is healthy, check if any of it's neighbours are infected. If they are, infect this person
                 # if we roll a random number lower than the infection rate.
-                if current_infection_state == InfectionState.Healthy:
-                    if __iterate_neighbourhood(InfectionState.Infected, posY, posX):
-                        person.set_state(InfectionState.Infected)
+                if current_health_state == HealthState.Healthy:
+                    if __handle_healthy_person(HealthState.Infected, posY, posX):
+                        person.become_infected()
 
                 # If a person is infected, roll a random number and compare to mortality rate. If the person survives,
                 # Make it recovered
-                elif current_infection_state == InfectionState.Infected:
+                elif current_health_state == HealthState.Infected:
                     if random() < mortalityRate:
-                        person.set_state(InfectionState.Dead)
+                        person.become_dead()
                     else:
-                        person.set_state(InfectionState.Recovered)
+                        person.become_recovered()
 
             nextStateConfig[posY, posX] = person.get_state().value
 
     stateConfig, nextStateConfig = nextStateConfig, stateConfig
 
 
-def __iterate_neighbourhood(neighbourhood_state: InfectionState, pos_y: int, pos_x: int):
+def __handle_healthy_person(neighbourhood_state: HealthState, pos_y: int, pos_x: int):
     """
     Iterates through the neighbourhood of the current cell located at (pos_y, pos_x). If anyone
     in the neighbourhood has the desired state, roll a random number and compare it to the rate belonging
@@ -86,7 +88,7 @@ def __iterate_neighbourhood(neighbourhood_state: InfectionState, pos_y: int, pos
     """
     control_rate: float
 
-    if neighbourhood_state == InfectionState.Infected:
+    if neighbourhood_state == HealthState.Infected:
         control_rate = infectionRate
 
     for dx in range(-1, 2):
