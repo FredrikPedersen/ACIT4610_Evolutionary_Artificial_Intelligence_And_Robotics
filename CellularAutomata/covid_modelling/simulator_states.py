@@ -125,7 +125,6 @@ def __handle_healthy_person(person: Person, pos_y: int, pos_x: int) -> None:
 
             if stateConfig[y, x] == HealthState.Infected.value:
 
-                # TODO THERE IS A BUG HERE WHERE EITHER AN UNINFECTED OR DEAD PERSON IS BEING CHECKED FOR BEING INFECTIOUS
                 # The neighbour must be in an infectious phase of the disease to infect someone
                 if random() < Constants.INFECTION_RATE and people[y][x].get_infection().get_infectious():
                     person.become_infected()

@@ -1,6 +1,7 @@
 from covid_modelling.health_state import HealthState
 from covid_modelling.infection import Infection
 
+
 class Person:
 
     def __init__(self, state: HealthState, age: int):
