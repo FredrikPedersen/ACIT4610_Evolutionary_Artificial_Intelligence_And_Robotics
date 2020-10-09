@@ -26,10 +26,10 @@ def initialize():
 
             if random() < Constants.INIT_INFECTION_PROBABILITY:
                 state: HealthState = HealthState.Infected
-                people[posY][posX] = (Person(state, int(random()*100), Infection()))
+                people[posY][posX] = Person(state, int(random()*100))
             else:
                 state: HealthState = HealthState.Healthy
-                people[posY][posX] = (Person(state, int(random()*100)))
+                people[posY][posX] = Person(state, int(random()*100))
 
             stateConfig[posY, posX] = state.value
 
@@ -100,8 +100,7 @@ def __handle_infected_person(person: Person) -> None:
 
     # An infected person has a chance of recovering after they have been sick for the average duration of COVID-19, and
     # they roll a sufficient random number. Chances of going into recovery becomes higher the longer they are sick.
-    elif infection_duration >= Constants.AVERAGE_DURATION \
-            and random() < (Constants.RECOVERY_CHANCE + (infection_duration - Constants.INCUBATION_DURATION)/200):
+    elif infection_duration >= Constants.AVERAGE_DURATION and random() < (Constants.RECOVERY_CHANCE + (infection_duration - Constants.INCUBATION_DURATION)/200):
         person.become_recovered()
         return
 
@@ -111,8 +110,8 @@ def __handle_infected_person(person: Person) -> None:
 def __handle_healthy_person(person: Person, pos_y: int, pos_x: int) -> None:
     """
     Iterates through the neighbourhood of the current person located at (pos_y, pos_x). If anyone
-    in the neighbourhood has the desired state (infected), roll a random number and compare it to the infection rate
-    too see if the current cell should be updated.
+    in the neighbourhood has the desired state (infected), roll a random number and compare it to the infection rate for
+    each infected cell to see if the current cell should be updated.
 
     :param person: The person we are controlling the neighbourhood of
     :param pos_y: Y-coordinate of the current person
@@ -126,7 +125,7 @@ def __handle_healthy_person(person: Person, pos_y: int, pos_x: int) -> None:
 
             if stateConfig[y, x] == HealthState.Infected.value:
 
-                #TODO THERE IS A BUG HERE WHERE EITHER AN UNINFECTED OR DEAD PERSON IS BEING CHECKED FOR BEING INFECTIOUS
+                # TODO THERE IS A BUG HERE WHERE EITHER AN UNINFECTED OR DEAD PERSON IS BEING CHECKED FOR BEING INFECTIOUS
                 # The neighbour must be in an infectious phase of the disease to infect someone
                 if random() < Constants.INFECTION_RATE and people[y][x].get_infection().get_infectious():
                     person.become_infected()

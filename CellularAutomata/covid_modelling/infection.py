@@ -11,10 +11,15 @@ class Infection:
         self.__infection_stage: str = self.__INCUBATION
         self.__infectious: bool = False
 
-    def update(self) -> None:
-        self.__duration += 1
-        self.__update_infection_stage()
-        self.__update_infectious()
+    def update(self, active_infection=True) -> None:
+        if active_infection:
+            self.__duration += 1
+            self.__update_infection_stage()
+            self.__update_infectious()
+        else:
+            self.__duration = 0
+            self.__infection_stage = self.__INCUBATION
+            self.__infectious = False
 
     def get_duration(self) -> int:
         return self.__duration
@@ -35,3 +40,6 @@ class Infection:
 
         else:
             self.__infectious = False
+
+    def __str__(self):
+        return "Duration: " + str(self.__duration) + " Stage: " + str(self.__infection_stage) + " Infectious: " + str(self.__infectious)
