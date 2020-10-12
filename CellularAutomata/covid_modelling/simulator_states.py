@@ -1,22 +1,30 @@
+from typing import List
+
 from pylab import *
 
-import pycx.pycxsimulator as pycx
 import covid_modelling.constants as Constants
-from typing import List
+import pycx.pycxsimulator as pycx
 from covid_modelling.health_state import HealthState
 from covid_modelling.person import Person
-from covid_modelling.infection import Infection
 
 timeStep: int
+dead: int
+recovered: int
+total: int
+infected: int
 stateConfig: ndarray
 nextStateConfig: ndarray
 people: List[List[Person]]
 
 
 def initialize():
-    global timeStep, stateConfig, nextStateConfig, people
+    global timeStep, stateConfig, nextStateConfig, people, infected, dead, recovered, total
 
     timeStep = 0
+    infected = 0
+    dead = 0
+    recovered = 0
+    total = 0
 
     stateConfig = zeros([Constants.AREA_DIMENSIONS, Constants.AREA_DIMENSIONS], int)
     people = [[Person for i in range(Constants.AREA_DIMENSIONS)] for j in range(Constants.AREA_DIMENSIONS)]     # numpy does not support objects
@@ -26,12 +34,14 @@ def initialize():
 
             if random() < Constants.INIT_INFECTION_PROBABILITY:
                 state: HealthState = HealthState.Infected
-                people[posY][posX] = Person(state, int(random()*100))
+                people[posY][posX] = Person(state)
+                infected += 1
             else:
                 state: HealthState = HealthState.Healthy
-                people[posY][posX] = Person(state, int(random()*100))
+                people[posY][posX] = Person(state)
 
             stateConfig[posY, posX] = state.value
+            total += 1
 
     nextStateConfig = zeros([Constants.AREA_DIMENSIONS, Constants.AREA_DIMENSIONS])
 
@@ -39,12 +49,15 @@ def initialize():
 def observe():
     cla()
     imshow(stateConfig, vmin=0, vmax=len(HealthState), cmap=cm.jet)
-    axis('image')
-    title('t = ' + str(timeStep))
+    axis("image")
+
+    mortality_rate: float = round((dead/infected), 3)
+    title("Time: " + str(timeStep) + "\n" + " Total: " + str(total) + " Dead: " + str(dead) + " Recovered: " + str(recovered) + "\n"
+          + "Mortality Rate: " + str(mortality_rate))
 
 
 def update():
-    global timeStep, stateConfig, nextStateConfig, people
+    global timeStep, stateConfig, nextStateConfig, people, total
 
     timeStep += 1
 
@@ -67,41 +80,35 @@ def update():
                 elif current_health_state == HealthState.Infected:
                     __handle_infected_person(person)
 
+            else:
+                #   Replace dead or recovered cells with new ones
+                person = Person(HealthState.Healthy)
+                total += 1
+
             nextStateConfig[posY, posX] = person.get_state().value
+            people[posY][posX] = person
 
     stateConfig, nextStateConfig = nextStateConfig, stateConfig
 
-    if timeStep == 80:
-        __calculate_mortality()
-
-
-# For testing purposes, delete later
-def __calculate_mortality():
-
-    entities = 0
-    dead = 0
-    for row in range(len(people)):
-        for column in range(len(people[row])):
-            entities += 1
-            if people[row][column].get_state() == HealthState.Dead:
-                dead += 1
-
-    print(dead / entities)
-
 
 def __handle_infected_person(person: Person) -> None:
+    global dead
+    global recovered
+
     infection_duration = person.get_infection().get_duration()
 
     # Currently only old people die according to our model, introduce variables for checking if a person has other
     # Health problems as well.
     if person.get_age() > 60 and random() < Constants.MORTALITY_RATE:
         person.become_dead()
+        dead += 1
         return
 
     # An infected person has a chance of recovering after they have been sick for the average duration of COVID-19, and
     # they roll a sufficient random number. Chances of going into recovery becomes higher the longer they are sick.
     elif infection_duration >= Constants.AVERAGE_DURATION and random() < (Constants.RECOVERY_CHANCE + (infection_duration - Constants.INCUBATION_DURATION)/200):
         person.become_recovered()
+        recovered += 1
         return
 
     person.get_infection().update()
@@ -118,6 +125,8 @@ def __handle_healthy_person(person: Person, pos_y: int, pos_x: int) -> None:
     :param pos_x: X-coordinate of the current person
     """
 
+    global infected
+
     for dx in range(-1, 2):
         for dy in range(-1, 2):
             y = (pos_y + dy) % Constants.AREA_DIMENSIONS
@@ -128,6 +137,6 @@ def __handle_healthy_person(person: Person, pos_y: int, pos_x: int) -> None:
                 # The neighbour must be in an infectious phase of the disease to infect someone
                 if random() < Constants.INFECTION_RATE and people[y][x].get_infection().get_infectious():
                     person.become_infected()
-
+                    infected += 1
 
 pycx.GUI().start(func=[initialize, observe, update])
