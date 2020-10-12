@@ -1,12 +1,15 @@
 from covid_modelling.health_state import HealthState
 from covid_modelling.infection import Infection
-from numpy.random.mtrand import random
+import random
 
 
 class Person:
 
     def __init__(self, state: HealthState):
         self.__state: HealthState = state
+
+        self.__social_distancing: bool = bool(random.getrandbits(1))
+        self.__wearing_mask: bool = bool(random.getrandbits(1))
         self.__age = self.__generate_random_age()
         self.__infection: Infection = Infection()
 
@@ -22,10 +25,16 @@ class Person:
         self.__infection.update(False)
 
     def __generate_random_age(self) -> int:
-        return int(random() * 100)
+        return int(random.random() * 100)
 
     def get_state(self) -> HealthState:
         return self.__state
+
+    def get_social_distancing(self) -> bool:
+        return self.__social_distancing
+
+    def get_wearing_mask(self) -> bool:
+        return self.__wearing_mask
 
     def get_age(self) -> int:
         return self.__age
