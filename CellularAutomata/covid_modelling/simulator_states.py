@@ -52,7 +52,7 @@ def observe():
     axis("image")
 
     mortality_rate: float = round((dead/infected), 3)
-    title("Time: " + str(timeStep) + "\n" + " Total: " + str(total) + " Dead: " + str(dead) + " Recovered: " + str(recovered) + "\n"
+    title("Time: " + str(timeStep) + "\n" + " Total Infected: " + str(infected) + " Dead: " + str(dead) + " Recovered: " + str(recovered) + "\n"
           + "Mortality Rate: " + str(mortality_rate))
 
 
@@ -97,9 +97,7 @@ def __handle_infected_person(person: Person) -> None:
 
     infection_duration = person.get_infection().get_duration()
 
-    # Currently only old people die according to our model, introduce variables for checking if a person has other
-    # Health problems as well.
-    if person.get_age() > 60 and random() < Constants.MORTALITY_RATE:
+    if person.get_infection().get_lethal():
         person.become_dead()
         dead += 1
         return
@@ -127,6 +125,14 @@ def __handle_healthy_person(person: Person, pos_y: int, pos_x: int) -> None:
 
     global infected
 
+    infection_chance = Constants.INFECTION_CHANCE
+
+    if person.get_wearing_mask():
+        infection_chance *= Constants.MASK_REDUCTION
+
+    if person.get_social_distancing():
+        infection_chance *= Constants.DISTANCING_REDUCTION
+
     for dx in range(-1, 2):
         for dy in range(-1, 2):
             y = (pos_y + dy) % Constants.AREA_DIMENSIONS
@@ -135,8 +141,9 @@ def __handle_healthy_person(person: Person, pos_y: int, pos_x: int) -> None:
             if stateConfig[y, x] == HealthState.Infected.value:
 
                 # The neighbour must be in an infectious phase of the disease to infect someone
-                if random() < Constants.INFECTION_RATE and people[y][x].get_infection().get_infectious():
+                if random() < infection_chance and people[y][x].get_infection().get_infectious():
                     person.become_infected()
                     infected += 1
+
 
 pycx.GUI().start(func=[initialize, observe, update])

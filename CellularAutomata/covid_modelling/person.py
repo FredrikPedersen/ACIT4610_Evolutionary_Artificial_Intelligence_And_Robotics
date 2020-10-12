@@ -1,5 +1,6 @@
 from covid_modelling.health_state import HealthState
 from covid_modelling.infection import Infection
+import covid_modelling.constants as Constants
 import random
 
 
@@ -12,6 +13,17 @@ class Person:
         self.__wearing_mask: bool = bool(random.getrandbits(1))
         self.__age = self.__generate_random_age()
         self.__infection: Infection = Infection()
+
+        #   Random check to see if the person belongs in a risk group
+        if random.random() < Constants.MORTAL_RISK_GROUP_PERCENTAGE:
+            self.__risk_group = True
+        else:
+            self.__risk_group = False
+
+        #   Determine whether the virus would be lethal to this person
+        if self.__risk_group or self.__age > Constants.MORTAL_RISK_AGE:
+            if random.random() < Constants.MORTALITY_CHANCE:
+                self.__infection.set_lethal(True)
 
     def become_infected(self):
         self.__state = HealthState.Infected
@@ -41,6 +53,9 @@ class Person:
 
     def get_infection(self) -> Infection:
         return self.__infection
+
+    def get_risk_group(self) -> bool:
+        return self.__risk_group
 
     def set_state(self, state: HealthState):
         self.__state = state

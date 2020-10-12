@@ -10,6 +10,7 @@ class Infection:
         self.__duration: int = 0
         self.__infection_stage: str = self.__INCUBATION
         self.__infectious: bool = False
+        self.__lethal: bool = False     # If the infection will be lethal for the person
 
     def update(self, active_infection=True) -> None:
         if active_infection:
@@ -26,6 +27,12 @@ class Infection:
 
     def get_infectious(self) -> bool:
         return self.__infectious
+
+    def get_lethal(self) -> bool:
+        return self.__lethal
+
+    def set_lethal(self, lethal: bool) -> None:
+        self.__lethal = lethal
 
     def __update_infection_stage(self) -> None:
         if self.__duration > Constants.INCUBATION_DURATION:
