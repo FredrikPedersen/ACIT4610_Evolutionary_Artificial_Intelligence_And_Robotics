@@ -1,12 +1,13 @@
 from covid_modelling.health_state import HealthState
 from covid_modelling.infection import Infection
+from numpy.random.mtrand import random
 
 
 class Person:
 
-    def __init__(self, state: HealthState, age: int):
+    def __init__(self, state: HealthState):
         self.__state: HealthState = state
-        self.__age = age
+        self.__age = self.__generate_random_age()
         self.__infection: Infection = Infection()
 
     def become_infected(self):
@@ -19,6 +20,9 @@ class Person:
     def become_dead(self):
         self.__state = HealthState.Dead
         self.__infection.update(False)
+
+    def __generate_random_age(self) -> int:
+        return int(random() * 100)
 
     def get_state(self) -> HealthState:
         return self.__state
@@ -34,3 +38,4 @@ class Person:
 
     def __str__(self):
         return "Age: " + str(self.__age) + " Infection: " + str(self.__infection) + " State: " + str(self.__state.value)
+
