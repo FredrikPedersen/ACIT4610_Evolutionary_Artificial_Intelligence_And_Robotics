@@ -11,7 +11,7 @@ class Person:
 
         self.__social_distancing: bool = bool(random.getrandbits(1))
         self.__wearing_mask: bool = bool(random.getrandbits(1))
-        self.__age = self.__generate_random_age()
+        self.__age = int(random.random() * 100)
         self.__infection: Infection = Infection()
 
         #   Random check to see if the person belongs in a risk group
@@ -35,10 +35,7 @@ class Person:
     def become_dead(self):
         self.__state = HealthState.Dead
         self.__infection.update(False)
-
-    def __generate_random_age(self) -> int:
-        return int(random.random() * 100)
-
+        
     def get_state(self) -> HealthState:
         return self.__state
 
