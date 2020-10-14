@@ -32,12 +32,10 @@ def initialize():
         for posY in range(Constants.AREA_DIMENSIONS):
 
             if random() < Constants.INIT_INFECTION_PROBABILITY:
-                state: HealthState = HealthState.Infected
-                stateConfig[posY][posX] = Person(state)
+                stateConfig[posY][posX] = Person(HealthState.Infected)
                 infected += 1
             else:
-                state: HealthState = HealthState.Healthy
-                stateConfig[posY][posX] = Person(state)
+                stateConfig[posY][posX] = Person(HealthState.Healthy)
 
             total += 1
 
@@ -57,7 +55,7 @@ def observe():
 
 
 def update():
-    global timeStep, stateConfig, nextStateConfig, people, total
+    global timeStep, stateConfig, nextStateConfig, total
 
     timeStep += 1
 
