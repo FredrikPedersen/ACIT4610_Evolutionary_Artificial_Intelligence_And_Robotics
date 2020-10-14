@@ -64,17 +64,17 @@ which is being used to run the initialize, update and observe functions.
 
 In our version of the simulation, there are still the **three core functions**:
 ```Python
- initialize()
- update()
- observe()
+ initialize() -> None
+ update() -> None
+ observe() -> None
 ```
 
 There are also two functions for handling infected and non-infected cells, and one function for extracting the 
 health_state integer values for each person, placing them in a separate array which is passed to Pyplot:
 ```Python
- __handle_healthy_person(person, pos_y, pos_x)
- __handle_infected_person(person)
- __create_health_value_array()
+ __handle_healthy_person(person: Person, pos_y: int, pos_x: int) -> None
+ __handle_infected_person(person: Person) -> None
+ __create_health_value_array() -> ndarray
 ```
 
 ### initialize()
@@ -101,8 +101,39 @@ With the current values assigned to each state (see health_state.py), pyplot gen
  - Dark Blue = Recovered
  
 ### __handle_healthy_person(person, pos_y, pos_x)
+This function is used to determine whether a healthy person at position (y, x) is to going to become infected.
+To determine this, we check the healthy persons neighbourhood (all cells directly adjacent to (y, x)) for infection.
+For each infected cell found we calculate the infection chance and compare that to a randomly generated number to determine
+whether they get infected (see Simulation Constants - INFECTION_CHANCE).
+
 ### __handle_infected_person(person)
+When handling an infected person, there are three possible outcomes: they die, they recover or they stay infected.
+
+1. Death:
+    - If a person's infection was marked as lethal when initializing the person (see Simulation Constants - MORTALITY_CHANCE)
+    the person dies. 
+    - Plans are to implement a check to see if the virus symptoms has lasted for at least a week before the 
+    person dies, as that would be a more realistic scenario.  
+
+2. Recovery:
+    - If a person does not die, we test if they have been sick longer or equal to the average duration of the disease.
+    - If so, we take RECOVERY_CHANCE plus the time a person has been having symptoms divided by 200 (200 in this
+    case is an arbitrary made up so recovery chances won't be too high) and compare it to a random number. This way, the
+    longer a person is sick over the average duration, the higher their chances of recovering.
+
+3. Remain Infected:
+    - If a person remains infected, their infection object is updated.
+    - This entails that the infection's duration is incremented, and if appropriate, it's infection_stage (Incubation or
+    Showing Sympoms) and whether it is infectious or not is updated.
+
 ### __create_health_value_array()
+The PyCX simulator utilizes Pyplot's imshow function to render the grid, and that only accepts an array with integer
+values. This function creates a 2D Numpy array with the health_state values from each person in the stateConfig in
+order to render a cells health state graphicly.
+
+In terms of effectiveness, looping through the entire stateConfig and retrieving the health_state value for every
+person object is abysmal. We will look into how to pass stateConfig directly to some Pyplot function if we get the time 
+for it.
 
 # Research, and how it is reflected in the simulation
 

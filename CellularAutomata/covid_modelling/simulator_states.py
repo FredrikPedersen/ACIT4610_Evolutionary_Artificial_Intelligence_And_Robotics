@@ -130,17 +130,6 @@ def __handle_healthy_person(person: Person, pos_y: int, pos_x: int) -> None:
 
 
 def __create_health_value_array() -> ndarray:
-    """
-    The PyCX simulator utilizes Pyplot's imshow function to render the grid, and that only accepts an array with integer
-    values. This function creates a 2D numpy array with the health_state values from each person in the stateConfig in
-    order to render a cells health state graphicly.
-
-    In terms of effectiveness, looping through the entire stateConfig and retrieving the health_state value for every
-    person object is abysmal. Look into how to pass stateConfig directly to some Pyplot function if we get the time for
-    it.
-
-    :return: 2D ndarray with the health_state values of every person object in stateConfig.
-    """
     global stateConfig
     health_values: ndarray = zeros([Constants.AREA_DIMENSIONS, Constants.AREA_DIMENSIONS], int)
 
