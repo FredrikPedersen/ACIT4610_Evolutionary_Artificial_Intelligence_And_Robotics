@@ -52,10 +52,10 @@ related problems. Their infection will however not start progressing unless the 
 
 ## Simulation Behaviour
 
-The simulation is based of the PyCX-library's [ca-hostpathogen](https://github.com/hsayama/PyCX/blob/master/ca-hostpathogen.py)
-script. This version is by all means a lot more complex, but in it's core it still based of the same concepts, having an
-array with configurations being initialized, updated by checking the neighbours of each cell in the configuration, and 
-finally a Pyplot graph observes the changes in the configuration.  
+This simulation is based of the PyCX-library's [ca-hostpathogen](https://github.com/hsayama/PyCX/blob/master/ca-hostpathogen.py)
+script. Our simulation is by all means a lot more complex than the PyCX sample, but in it's core it still based of the 
+same concepts, having an array with configurations being initialized, updated by checking the neighbours of each cell in
+the configuration, and finally a Pyplot graph observes the changes in the configuration.  
 
 There have been no changes to the behaviour of the [PyCX simulator](https://github.com/hsayama/PyCX/blob/master/pycxsimulator.py)
 which is being used to run the initialize, update and observe functions.
@@ -154,8 +154,8 @@ To make it simple, this simulation will consider a recovered patient as immune.
 Both dead and recovered patients are thus considered inactive cells, and are replaced by new healthy cells.
 
 ### Sources
-[Reinfection](https://theconversation.com/coronavirus-reinfection-what-it-actually-means-and-why-you-shouldnt-panic-144965)
-[Mask Reduction Chance](https://www.ucdavis.edu/coronavirus/news/your-mask-cuts-own-risk-65-percent/)
-[Risk Groups](https://forskning.no/sykdommer-virus/hvem-er-egentlig-i-risikogruppen-for-korona/1659901)
+[Reinfection](https://theconversation.com/coronavirus-reinfection-what-it-actually-means-and-why-you-shouldnt-panic-144965)  
+[Mask Reduction Chance](https://www.ucdavis.edu/coronavirus/news/your-mask-cuts-own-risk-65-percent/)  
+[Risk Groups](https://forskning.no/sykdommer-virus/hvem-er-egentlig-i-risikogruppen-for-korona/1659901)  
   
  
