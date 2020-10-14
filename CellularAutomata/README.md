@@ -3,7 +3,6 @@
 *pip install numpy scipy matplotlib ipython jupyter pandas sympy nose*  
 *pip install networkx*
 
-
 # The Simulation
 
 The simulation is trying to make a somewhat realistic model of the spread of COVID-19 utilizing cellular automata for
@@ -50,7 +49,6 @@ related problems. Their infection will however not start progressing unless the 
  - **MORTAL_RISK_GROUP_PERCENTAGE:** How much of the (norwegian) population considered to be in a risk group due to health
  conditions. When a person object is initialized, this percentage is compared to a random number to see if the person 
  will be in a risk group.
-
 
 ## Simulation Behaviour
 
@@ -150,10 +148,10 @@ the infection, until day 20. After day 20 they are considered as recovered.
 
 ### Recovered and Dead Patients
 
-A recovered patient is in practice not immune to reinfection, but the cases are very rare, and
-those that are confirmed didn't show any symptoms and their infectiousness is up for debate.
+A recovered patient is in practice not immune to reinfection, but the cases are very rare.
+Those who are confirmed reinfected didn't show any symptoms, and their infectiousness is up for debate.
 To make it simple, this simulation will consider a recovered patient as immune.  
-Both dead and recovered patients are thus considered inactive agents, and are replaced by new healthy cells.
+Both dead and recovered patients are thus considered inactive cells, and are replaced by new healthy cells.
 
 ### Sources
 [Reinfection](https://theconversation.com/coronavirus-reinfection-what-it-actually-means-and-why-you-shouldnt-panic-144965)
