@@ -12,13 +12,12 @@ dead: int
 recovered: int
 total: int
 infected: int
-stateConfig: ndarray
-nextStateConfig: ndarray
-people: List[List[Person]]
+stateConfig: List[List[Person]]
+nextStateConfig: List[List[Person]]
 
 
 def initialize():
-    global timeStep, stateConfig, nextStateConfig, people, infected, dead, recovered, total
+    global timeStep, stateConfig, nextStateConfig, infected, dead, recovered, total
 
     timeStep = 0
     infected = 0
@@ -26,29 +25,30 @@ def initialize():
     recovered = 0
     total = 0
 
-    stateConfig = zeros([Constants.AREA_DIMENSIONS, Constants.AREA_DIMENSIONS], int)
-    people = [[Person for i in range(Constants.AREA_DIMENSIONS)] for j in range(Constants.AREA_DIMENSIONS)]     # numpy does not support objects
+    # numpy arrays does not support objects, using a standard 2D-array instead
+    stateConfig = [[Person for i in range(Constants.AREA_DIMENSIONS)] for j in range(Constants.AREA_DIMENSIONS)]
 
     for posX in range(Constants.AREA_DIMENSIONS):
         for posY in range(Constants.AREA_DIMENSIONS):
 
             if random() < Constants.INIT_INFECTION_PROBABILITY:
                 state: HealthState = HealthState.Infected
-                people[posY][posX] = Person(state)
+                stateConfig[posY][posX] = Person(state)
                 infected += 1
             else:
                 state: HealthState = HealthState.Healthy
-                people[posY][posX] = Person(state)
+                stateConfig[posY][posX] = Person(state)
 
-            stateConfig[posY, posX] = state.value
             total += 1
 
-    nextStateConfig = zeros([Constants.AREA_DIMENSIONS, Constants.AREA_DIMENSIONS])
+    nextStateConfig = [[Person for i in range(Constants.AREA_DIMENSIONS)] for j in range(Constants.AREA_DIMENSIONS)]
 
 
 def observe():
+    health_values: ndarray = __create_health_value_array()
+
     cla()
-    imshow(stateConfig, vmin=0, vmax=len(HealthState), cmap=cm.jet)
+    imshow(health_values, vmin=0, vmax=len(HealthState), cmap=cm.jet)
     axis("image")
 
     mortality_rate: float = round((dead/infected), 3)
@@ -64,7 +64,7 @@ def update():
     for posX in range(Constants.AREA_DIMENSIONS):
         for posY in range(Constants.AREA_DIMENSIONS):
 
-            person: Person = people[posY][posX]
+            person: Person = stateConfig[posY][posX]
             current_health_state: HealthState = person.get_state()
 
             # Dead people stay dead, recovered patients don't contract the disease over again
@@ -85,8 +85,7 @@ def update():
                 person = Person(HealthState.Healthy)
                 total += 1
 
-            nextStateConfig[posY, posX] = person.get_state().value
-            people[posY][posX] = person
+            nextStateConfig[posY][posX] = person
 
     stateConfig, nextStateConfig = nextStateConfig, stateConfig
 
@@ -138,12 +137,34 @@ def __handle_healthy_person(person: Person, pos_y: int, pos_x: int) -> None:
             y = (pos_y + dy) % Constants.AREA_DIMENSIONS
             x = (pos_x + dx) % Constants.AREA_DIMENSIONS
 
-            if stateConfig[y, x] == HealthState.Infected.value:
+            if stateConfig[y][x].get_state() == HealthState.Infected:
 
                 # The neighbour must be in an infectious phase of the disease to infect someone
-                if random() < infection_chance and people[y][x].get_infection().get_infectious():
+                if random() < infection_chance and stateConfig[y][x].get_infection().get_infectious():
                     person.become_infected()
                     infected += 1
+
+
+def __create_health_value_array() -> ndarray:
+    """
+    The PyCX simulator utilizes Pyplot's imshow function to render the grid, and that only accepts an array with integer
+    values. This function creates a 2D numpy array with the health_state values from each person in the stateConfig in
+    order to render a cells health state graphicly.
+
+    In terms of effectiveness, looping through the entire stateConfig and retrieving the health_state value for every
+    person object is abysmal. Look into how to pass stateConfig directly to some Pyplot function if we get the time for
+    it.
+
+    :return: 2D ndarray with the health_state values of every person object in stateConfig.
+    """
+    global stateConfig
+    health_values: ndarray = zeros([Constants.AREA_DIMENSIONS, Constants.AREA_DIMENSIONS], int)
+
+    for columns in range(len(stateConfig)):
+        for rows in range(len(stateConfig[columns])):
+            health_values[columns, rows] = stateConfig[columns][rows].get_state().value
+
+    return health_values
 
 
 pycx.GUI().start(func=[initialize, observe, update])
