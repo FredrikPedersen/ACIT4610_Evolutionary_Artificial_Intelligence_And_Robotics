@@ -7,7 +7,7 @@
 # The Simulation
 
 The simulation is trying to make a somewhat realistic model of the spread of COVID-19 utilizing cellular automata for
-determining how the virus is spread from cell to cell.
+determining how efficiently the virus is spread from person to person.
 
 ## Simulation Classes
 
@@ -23,7 +23,7 @@ linked an integer number to represent each state. I.e Healthy = 1, Infected = 2.
 
 The infection class represents a person's infection, and is used to keep track of what stage of infection a person is
 in (i.e whether they are infectious or not), how long they have been sick, and if the disease is potentially lethal to 
-it's host. 
+it's host.  
 
 ### Person
 
@@ -33,9 +33,24 @@ if they are utilizing infection preventing measures like social distancing and w
 Note that every person object has an infection object tied to them, even if they are not sick, as to avoid None-value
 related problems. Their infection will however not start progressing unless the person's health_state is set to INFECTED.
 
-## Simulation Variables
+## Simulation Constants
 
-Coming soon!
+ - **AREA_DIMENSIONS:** The simulation has nxn number of cells/people. AREA_DIMENSIONS = n.  
+ - **INIT_INFECTION_PROBABILITY:** This is an arbitrary number used to set the percentage of initially infected people.  
+ - **INFECTION_CHANCE:** Chance of a healthy person being infected by an infected one. In the case where a healthy cell 
+ has an infected neighbour, this chance is multiplied with the reduction values of the persons registered infection 
+ prevention measures (e.g wearing a mask). Then a random number is generated, if that is lower than the resulting 
+ infection chance, the healthy cell becomes infected.
+ - **MORTALITY_CHANCE:** The chance of a person dying from the virus. In this simulation we only consider people in the
+ risk groups of being in mortal danger. If an infected person is in a risk group, the mortality chance is being compared
+ to a random number to see if the infection will kill the person.  
+ - **MASK_REDUCTION:** How much less of a percentage chance there is to become infected if wearing a face covering mask.
+ - **DISTANCING_REDUCTION:** How much less of a percentage chance there is to become infected if practicing social distancing.
+ - **MORTAL_RISK_AGE:** Minimum age of a person to be considered in a risk group.
+ - **MORTAL_RISK_GROUP_PERCENTAGE:** How much of the (norwegian) population considered to be in a risk group due to health
+ conditions. When a person object is initialized, this percentage is compared to a random number to see if the person 
+ will be in a risk group.
+
 
 ## Simulation Behaviour
 
@@ -71,9 +86,8 @@ To make it simple, this simulation will consider a recovered patient as immune.
 Both dead and recovered patients are thus considered inactive agents, and are replaced by new healthy cells.
 
 ### Sources
-[Reinfection](https://theconversation.com/coronavirus-reinfection-what-it-actually-means-and-why-you-shouldnt-panic-144965)  
-  
-  
-  
+[Reinfection](https://theconversation.com/coronavirus-reinfection-what-it-actually-means-and-why-you-shouldnt-panic-144965)
+[Mask Reduction Chance](https://www.ucdavis.edu/coronavirus/news/your-mask-cuts-own-risk-65-percent/)
+[Risk Groups](https://forskning.no/sykdommer-virus/hvem-er-egentlig-i-risikogruppen-for-korona/1659901)
   
  
