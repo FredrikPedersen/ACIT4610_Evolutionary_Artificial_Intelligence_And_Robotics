@@ -46,9 +46,9 @@ def observe():
     imshow(health_values, vmin=0, vmax=len(HealthState), cmap=cm.jet)
     axis("image")
 
-    mortality_rate: float = round((dead/infected), 3)
-    title("Time: " + str(timeStep) + "\n" + " Total Infected: " + str(infected) + " Dead: " + str(dead) + " Recovered: " + str(recovered) + "\n"
-          + "Mortality Rate: " + str(mortality_rate))
+    mortality_rate_percent: float = round((dead/infected)*100, 2)
+    title("Days: " + str(timeStep) + "\n" + " Total Infected: " + str(infected) + " Dead: " + str(dead) + " Recovered: " + str(recovered) + "\n"
+          + "Mortality Rate: " + str(mortality_rate_percent) + "%")
 
 
 def update():
