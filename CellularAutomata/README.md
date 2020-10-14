@@ -54,16 +54,55 @@ related problems. Their infection will however not start progressing unless the 
 
 ## Simulation Behaviour
 
-Coming soon!
+The simulation is based of the PyCX-library's [ca-hostpathogen](https://github.com/hsayama/PyCX/blob/master/ca-hostpathogen.py)
+script. This version is by all means a lot more complex, but in it's core it still based of the same concepts, having an
+array with configurations being initialized, updated by checking the neighbours of each cell in the configuration, and 
+finally a Pyplot graph observes the changes in the configuration.  
 
-### Visual Color scheme
-Blue = Healthy
+There have been no changes to the behaviour of the [PyCX simulator](https://github.com/hsayama/PyCX/blob/master/pycxsimulator.py)
+which is being used to run the initialize, update and observe functions.
 
-Red = Dead
+In our version of the simulation, there are still the **three core functions**:
+```Python
+ initialize()
+ update()
+ observe()
+```
 
-Green = Infected
+There are also two functions for handling infected and non-infected cells, and one function for extracting the 
+health_state integer values for each person, placing them in a separate array which is passed to Pyplot:
+```Python
+ __handle_healthy_person(person, pos_y, pos_x)
+ __handle_infected_person(person)
+ __create_health_value_array()
+```
 
-Dark Blue = Recovered
+### initialize()
+Here the simulation configuration and all other variables are initialized.
+The core of the function is creating the **stateConfig** 2D-array containing all the person objects. In the initial 
+config there is a percentage of people starting as infected, determined by generating a random number and comparing it 
+to the INIT_INFECTION_PROBABILITY constant (random < init_probability results in infected person).
+
+### update()
+Increments the timeStep before updating each person object in stateConfig:
+ - Dead or Recovered persons are being replaced with new, Healthy people to keep the simulation going.
+ - Healthy people are passed to healthy person handler to determine whether they should get infected.
+ - Infected people are passed to infected person handler to determine whether they die, recover or remain sick.
+ 
+### observe()
+Calls function to create an integer array containing all the health states of the person objects in the stateConfig,
+then passes this array to Pyplot.imshow to generate the visual graph. This is also where the info texts (like current
+timestep, total infected etc) are set.
+
+With the current values assigned to each state (see health_state.py), pyplot generates the following color scheme:
+ - Blue = Healthy
+ - Red = Dead
+ - Green = Infected
+ - Dark Blue = Recovered
+ 
+### __handle_healthy_person(person, pos_y, pos_x)
+### __handle_infected_person(person)
+### __create_health_value_array()
 
 # Research, and how it is reflected in the simulation
 
