@@ -15,7 +15,7 @@ infected: int
 stateConfig: List[List[Person]]
 
 
-def initialize():
+def initialize() -> None:
     global timeStep, stateConfig, infected, dead, recovered, total
 
     timeStep = 0
@@ -39,7 +39,7 @@ def initialize():
             total += 1
 
 
-def observe():
+def observe() -> None:
     health_values: ndarray = __create_health_value_array()
 
     cla()
@@ -47,11 +47,11 @@ def observe():
     axis("image")
 
     mortality_rate_percent: float = round((dead/infected)*100, 2)
-    title("Days: " + str(timeStep) + "\n" + " Total Infected: " + str(infected) + " Dead: " + str(dead) + " Recovered: " + str(recovered) + "\n"
-          + "Mortality Rate: " + str(mortality_rate_percent) + "%")
+    title(f"Days: {timeStep}\n Total Infected: {infected} Dead: {dead} Recovered: {recovered}\n "
+          f"Mortality Rate: {mortality_rate_percent} %")
 
 
-def update():
+def update() -> None:
     global timeStep, stateConfig, total
 
     timeStep += 1
