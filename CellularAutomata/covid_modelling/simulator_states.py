@@ -13,11 +13,10 @@ recovered: int
 total: int
 infected: int
 stateConfig: List[List[Person]]
-nextStateConfig: List[List[Person]]
 
 
 def initialize():
-    global timeStep, stateConfig, nextStateConfig, infected, dead, recovered, total
+    global timeStep, stateConfig, infected, dead, recovered, total
 
     timeStep = 0
     infected = 0
@@ -39,8 +38,6 @@ def initialize():
 
             total += 1
 
-    nextStateConfig = [[Person for i in range(Constants.AREA_DIMENSIONS)] for j in range(Constants.AREA_DIMENSIONS)]
-
 
 def observe():
     health_values: ndarray = __create_health_value_array()
@@ -55,7 +52,7 @@ def observe():
 
 
 def update():
-    global timeStep, stateConfig, nextStateConfig, total
+    global timeStep, stateConfig, total
 
     timeStep += 1
 
@@ -83,9 +80,7 @@ def update():
                 person = Person(HealthState.Healthy)
                 total += 1
 
-            nextStateConfig[posY][posX] = person
-
-    stateConfig, nextStateConfig = nextStateConfig, stateConfig
+            stateConfig[posY][posX] = person
 
 
 def __handle_infected_person(person: Person) -> None:
