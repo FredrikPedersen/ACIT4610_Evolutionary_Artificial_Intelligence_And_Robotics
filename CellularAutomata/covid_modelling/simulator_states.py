@@ -96,24 +96,16 @@ def __handle_infected_person(person: Person) -> None:
 
     # An infected person has a chance of recovering after they have been sick for the average duration of COVID-19, and
     # they roll a sufficient random number. Chances of going into recovery becomes higher the longer they are sick.
-    elif infection_duration >= Constants.AVERAGE_DURATION and random() < (Constants.RECOVERY_CHANCE + (infection_duration - Constants.INCUBATION_DURATION)/200):
-        person.become_recovered()
-        recovered += 1
-        return
+    elif infection_duration >= Constants.AVERAGE_DURATION:
+        if random() < (Constants.RECOVERY_CHANCE + (infection_duration - Constants.INCUBATION_DURATION) / 200):
+            person.become_recovered()
+            recovered += 1
+            return
 
     person.get_infection().update()
 
 
 def __handle_healthy_person(person: Person, pos_y: int, pos_x: int) -> None:
-    """
-    Iterates through the neighbourhood of the current person located at (pos_y, pos_x). If anyone
-    in the neighbourhood has the desired state (infected), roll a random number and compare it to the infection rate for
-    each infected cell to see if the current cell should be updated.
-
-    :param person: The person we are controlling the neighbourhood of
-    :param pos_y: Y-coordinate of the current person
-    :param pos_x: X-coordinate of the current person
-    """
     global infected
 
     for dx in range(-1, 2):
