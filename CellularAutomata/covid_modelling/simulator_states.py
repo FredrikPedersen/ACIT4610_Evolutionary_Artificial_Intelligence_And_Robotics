@@ -114,16 +114,7 @@ def __handle_healthy_person(person: Person, pos_y: int, pos_x: int) -> None:
     :param pos_y: Y-coordinate of the current person
     :param pos_x: X-coordinate of the current person
     """
-
     global infected
-
-    infection_chance = Constants.INFECTION_CHANCE
-
-    if person.get_wearing_mask():
-        infection_chance *= Constants.MASK_REDUCTION
-
-    if person.get_social_distancing():
-        infection_chance *= Constants.DISTANCING_REDUCTION
 
     for dx in range(-1, 2):
         for dy in range(-1, 2):
@@ -131,6 +122,14 @@ def __handle_healthy_person(person: Person, pos_y: int, pos_x: int) -> None:
             x = (pos_x + dx) % Constants.AREA_DIMENSIONS
 
             if stateConfig[y][x].get_state() == HealthState.Infected:
+
+                infection_chance = Constants.INFECTION_CHANCE
+
+                if person.get_wearing_mask():
+                    infection_chance *= Constants.MASK_REDUCTION
+
+                if person.get_social_distancing():
+                    infection_chance *= Constants.DISTANCING_REDUCTION
 
                 # The neighbour must be in an infectious phase of the disease to infect someone
                 if random() < infection_chance and stateConfig[y][x].get_infection().get_infectious():
