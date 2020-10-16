@@ -14,7 +14,10 @@ total: int
 infected: int
 stateConfig: List[List[Person]]
 
-
+"""
+Functions and dependencies in this file, together with the general thought process and behaviour of the entire 
+simulation is documented in README.
+"""
 def initialize() -> None:
     global timeStep, stateConfig, infected, dead, recovered, total
 
