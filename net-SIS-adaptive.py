@@ -4,6 +4,7 @@ import csv
 import networkx as nx
 from math import sin, cos, sqrt, atan2
 import random
+import os , os.path
 
 """
 Functions that can be used when working with probabilities 
@@ -119,28 +120,72 @@ This will decouple the graph data structure from the UI.
 """
 class GraphController:
 
-    distance_graph = nx.Graph() #the distances between people
-    relationships_dynamics_graph = nx.Graph() # as restrictions are applied,dynamics between people change.
-    p_i = 0.5  # infection probability
-    p_r = 0.1  # recovery probability
-    p_s = 0.5  # severance probability
-    detection_probability = 0.1  # the probability of detecting the virus.
-    quarantined_people = set()
-    distances = set() # will contain the distances for data analysis
-    time_elapsed = 0
-    max_dist = 0
-    min_dist = 100
-    infected = 0
+    def __init__(self):
+        self.distance_graph = nx.Graph() #Modelling the distances between the people in the simulated world as a graph.
+        self.relationships_dynamics_graph = nx.Graph() #As restrictions are imposed,the social relationships dynamics changed.
+        self.infection_probability = 0.5 #How likely is for someone to be infected in the beginning.
+        self.recovery_probability = 0.1 #How likely is for someone to recover.
+        self.dying_probability = 0.5 #How likely is for someone that got infected to die.
+        self.detection_probability = 0.1 #How likely is for someone to be detected after contracting the virus.
+        self.quarantined_people = set() #How many people are quarantined at current time.
+        self.distances = [] #The distances between where people live.
+        self.time_elapsed = 0 #The current "time" in the simulation.
+        self.max_dist = 0 # Maximum distance between any 2 people.
+        self.min_dist = 100 # Minimum distance between any 2 peole.
+        self.no_infected = 0 # How many people are currently infected.
+        self.time_infected = {} # For each person,keep track of the time they were infected.
+        self.world_size = 10 # The number of people in the world.
 
     """
-    It's useful to know how long a person has been infected.
-    The probability of recovery should increase the longer that happened.
-    I will keep track of the last time a person was infected.
+    Setter for infection_probability.
+    
+    Parameters:
+        :param simulation_infection_probability:The infection probability we want to change to.
     """
-    time_infected = {}
+    def set_infection_probability(self,simulation_infection_probability):
+        self.infection_probability = simulation_infection_probability
+
+    """
+        Setter for recovery_probability.
+
+        Parameters:
+            :param simulation_recovery_probability:The recovery probability we want to change to.
+        """
+
+    def set_recovery_probability(self, simulation_recovery_probability):
+        self.recovery_probability = simulation_recovery_probability
+
+    """
+    Setter for dying_probability.
+
+    Parameters:
+        :param simulation_dying_probability:The dying probability we want to change to.
+    """
+    def set_dying_probability(self, simulation_dying_probability):
+        self.dying_probability = simulation_dying_probability
+
+    """
+    Setter for detection_probability.
+
+    Parameters:
+        :param simulation_detection_probability:The dying probability we want to change to.
+    """
+    def set_detection_probability(self, simulation_detection_probability):
+        self.detection_probability = simulation_detection_probability
+
+    """
+    Setter for world_size.
+
+    Parameters:
+        :param world_size:The number of people we want to have in the world.
+    """
+    def set_world_size(self, world_size):
+        self.world_size = world_size
 
     """
     Create a mapping between people and their coordinates.
+    
+    Returns:
     :return: returns a dictionary mapping people's names to their coordinates(latitude,longitude).
     """
     def create_people_mapping_to_coordinates(self):
@@ -171,8 +216,8 @@ class GraphController:
             :param people: The people dictionary
             :param size: The size we choose for our simulation
     """
-    def create_nodes(self,people,size = 10):
-        for person, coordinates in random.sample(list(people.items()), size):
+    def create_nodes(self,people):
+        for person, coordinates in random.sample(list(people.items()), self.world_size):
             self.relationships_dynamics_graph.add_node(person)
             self.distance_graph.add_node(person)
 
@@ -189,7 +234,7 @@ class GraphController:
             for j in self.relationships_dynamics_graph.nodes:
                 if i != j:
                     edge_length = UsefulMathematicalFunctions.calculate_distance_haversine(people[i],people[j])
-                    self.distances.add(edge_length)
+                    self.distances.append(edge_length)
                     self.distance_graph.add_edge(i,j,length = edge_length)
                     self.relationships_dynamics_graph.add_edge(i,j,length = edge_length)
                     if edge_length > self.max_dist:
@@ -204,9 +249,9 @@ class GraphController:
     """
     def infect_random_people(self):
             for person in self.relationships_dynamics_graph.nodes:
-                if random.random() < .5:
+                if random.random() < self.infection_probability :
                     self.relationships_dynamics_graph.nodes[person]['state'] = 1
-                    self.infected += 1
+                    self.no_infected += 1
                     self.time_infected [person] = 0
                 else:
                     self.relationships_dynamics_graph.nodes[person]['state'] = 0
@@ -223,7 +268,7 @@ class GraphController:
     """
     def initialize(self):
         people = self.create_people_mapping_to_coordinates()
-        self.create_nodes(people,100)
+        self.create_nodes(people)
         self.create_edges(people)
         self.infect_random_people()
 
@@ -234,44 +279,53 @@ class GraphController:
     :param apply_quarantine:Indicator whether we are currently applying quarantine measure or not.
     """
     def update_world(self,apply_quarantine):
-        a = choice(list(self.relationships_dynamics_graph.nodes))
-        all_neighbours = list(self.relationships_dynamics_graph.neighbors(a))
-        if self.relationships_dynamics_graph.nodes[a]['state'] == 0:  # if susceptible or recovered
-            b = choice(all_neighbours)
-            if self.relationships_dynamics_graph.nodes[b]['state'] == 1:  # if neighbor b is infected
-                if UsefulMathematicalFunctions.distance_linear_normalizer(self.max_dist, self.min_dist , self.relationships_dynamics_graph[a][b]['length'])  * 3 + random.uniform(0, 1) > 2:
-                    print("A person got infected")
-                    self.time_infected[a] = self.time_elapsed
-                    self.infected += 1
-                    self.relationships_dynamics_graph.nodes[a]['state'] = 1
+        if self.no_infected:
+            self.time_elapsed += 1
+            a = choice(list(self.relationships_dynamics_graph.nodes))
+            all_neighbours = list(self.relationships_dynamics_graph.neighbors(a))
+            if self.relationships_dynamics_graph.nodes[a]['state'] == 0:  # if susceptible or recovered
+                if self.relationships_dynamics_graph.degree(a):
+                    b = choice(all_neighbours)
+                    if self.relationships_dynamics_graph.nodes[b]['state'] == 1:  # if neighbor b is infected
+                        if random.random() <\
+                                (UsefulMathematicalFunctions.distance_linear_normalizer(self.max_dist, self.min_dist , self.relationships_dynamics_graph[a][b]['length']) * .75\
+                                + random.random() * .25):
+                            print("A person got infected")
+                            self.time_infected[a] = self.time_elapsed
+                            self.no_infected += 1
+                            self.relationships_dynamics_graph.nodes[a]['state'] = 1
+                            if apply_quarantine:
+                                # If the person was detected,they should be quarantined.
+                                if random.uniform(0, 1) < self.detection_probability:
+                                    print("A detection occured.Quarantine person")
+                                    self.quarantined_people.add(a)
+                                    for person in all_neighbours:
+                                        self.relationships_dynamics_graph.remove_edge(a, person)
+            else:
+                '''
+                The longer a person has been infected,the higher the probability of recovery.
+                '''
+                recovery_probability = UsefulMathematicalFunctions.recovery_probability_with_inverse_logarithmic(self.time_elapsed,self.time_infected[a])
+                print("Probability of recovery", recovery_probability )
+                if random.random() < recovery_probability:
+                    self.relationships_dynamics_graph.nodes[a]['state'] = 0
+                    self.no_infected -= 1
                     if apply_quarantine:
-                        # If the person was detected,they should be quarantined.
-                        if random.uniform(0, 1) < self.detection_probability:
-                            print("A detection occured.Quarantine person")
-                            self.quarantined_people.add(a)
+                        if a in self.quarantined_people:
+                            print("A quarantined person was healed.Reconnecting to other people.Removal from quarantine.")
+                            all_neighbours = list(self.distance_graph.neighbors(a))
                             for person in all_neighbours:
-                                self.relationships_dynamics_graph.remove_edge(a, person)
-        else:
-            '''
-            The longer a person has been infected,the higher the probability of recovery.
-            '''
-            recovery_probability = UsefulMathematicalFunctions.recovery_probability_with_inverse_logarithmic(self.time_elapsed,self.time_infected[a])
-            print("Probability of recovery", recovery_probability )
-            if random.random() < recovery_probability  :
-                self.relationships_dynamics_graph.nodes[a]['state'] = 0
-                self.infected -= 1
-                if apply_quarantine:
-                    if a in self.quarantined_people:
-                        print("A quarantined person was healed.Reconnecting to other people.Removal from quarantine.")
-                        all_neighbours = list(self.distance_graph.neighbors(a))
-                        for person in all_neighbours:
-                            if person not in self.quarantined_people:
-                                self.relationships_dynamics_graph.add_edge(a, person, length=self.distance_graph[a][person]['length'])
-                        self.quarantined_people.remove(a)
+                                if person not in self.quarantined_people:
+                                    self.relationships_dynamics_graph.add_edge(a, person, length=self.distance_graph[a][person]['length'])
+                            self.quarantined_people.remove(a)
+                        else:
+                            print("A non detected person was healed")
                     else:
-                        print("A non detected person was healed")
-                else:
-                    print("A person was healed.")
+                        print("A person was healed.")
+        else:
+            print("Congrats!Covid was beaten after", self.time_elapsed, "steps")
+            time.sleep(1)
+
     """
     Update process is also different.
     We will select a random number to represent people's movements but 
@@ -279,12 +333,8 @@ class GraphController:
     Not removing the edges means with quarantine.
     """
     def update_assuming_no_quarantine(self):
-        if self.infected:
-            self.time_elapsed += 1
-            self.update_world(False)
-        else:
-            print("Congrats!Covid was beaten after",self.time_elapsed,"steps")
-            time.sleep(1)
+        self.update_world(False)
+
     """
     We will assume quarantine is precisely followed.
     We will reconnect a node to its neighbors when it's healed.
@@ -292,13 +342,7 @@ class GraphController:
     also quarantined.
     """
     def update_assuming_quarantine(self):
-        if self.infected:
-            self.time_elapsed += 1
-            self.update_world(True)
-        else:
-            print("Congrats!Covid was beaten after",self.time_elapsed,"steps")
-            self.covid_beaten = True
-            time.sleep(1)
+        self.update_world(True)
 
 class Visualizer:
     graph_controller = GraphController()
@@ -344,35 +388,61 @@ def run_simulations(
         filename,
         quarantine=False,
         maximum_steps_per_simulation = 1_000_000_000,
-        no_simulations_to_run = 100_000
+        no_simulations_to_run = 100_000,
+        infection_probability = 0.5,
+        detection_probability = 0.1,
+        world_size = 30
 ):
     with open(filename, "w") as data_file:
-        numbers_steps_each_simulation = []
         no_simulations = 0
+        data_file.write("We will run " +
+                        str(no_simulations_to_run) +
+                        " simulations \n with initial infection probability " +
+                        str(infection_probability) +
+                        "\n detection probability " +
+                        str(detection_probability) +
+                        " \n with the world size " +
+                        str(world_size) +
+                        ". \n"
+                        )
         while no_simulations < no_simulations_to_run:
             graph_controller = GraphController()
+            graph_controller.set_detection_probability(detection_probability)
+            graph_controller.set_infection_probability(infection_probability)
+            graph_controller.set_world_size(world_size)
             graph_controller.initialize()
-            while graph_controller.infected and graph_controller.time_elapsed < maximum_steps_per_simulation:
-                print("Running simulation number ", no_simulations, "for", filename[:-4])
+            while graph_controller.no_infected and graph_controller.time_elapsed < maximum_steps_per_simulation:
+                print("Running simulation number " + str(no_simulations) + " for " + filename[:-5] + " scenario " + filename[-5][-1]+"." )
                 if quarantine:
                     graph_controller.update_assuming_quarantine()
                 else:
                     graph_controller.update_assuming_no_quarantine()
-            numbers_steps_each_simulation.append(graph_controller.time_elapsed)
             no_simulations += 1
-        data_file.write(str(numbers_steps_each_simulation))
+            data_file.write(str(graph_controller.time_elapsed) +'\n')
+            data_file.write(str(graph_controller.distances) +'\n')
 """
 visualizer = Visualizer()
 pycxsimulator.GUI().start(func=[visualizer.initialize, visualizer.observe, visualizer.update_assuming_quarantine])
 """
 
+infection_probability = random.random()
+detection_probability = random.random()
+world_size = random.randint(1,101)
+
+scenarios_run_so_far = str(len([name for name in os.listdir('.') if name.startswith("quarantine") and name.endswith(".txt")]))
 
 run_simulations(quarantine=True,
-                filename="quarantine.txt",
-                maximum_steps_per_simulation=1_000_000_000_000_000_000,
-                no_simulations_to_run=1000)
+                filename="quarantine" + scenarios_run_so_far + ".txt",
+                maximum_steps_per_simulation=1_000_000_000,
+                no_simulations_to_run=1_000_000,
+                infection_probability= infection_probability,
+                detection_probability = detection_probability,
+                world_size = world_size)
 
-run_simulations(
-                filename="non-quarantine.txt",
-                maximum_steps_per_simulation=1_000_000_000_000_000_000,
-                no_simulations_to_run=1000)
+run_simulations(quarantine=False,
+                filename="non-quarantine" + scenarios_run_so_far + ".txt",
+                maximum_steps_per_simulation=1_000_000_000,
+                no_simulations_to_run=1_000_000,
+                infection_probability = infection_probability,
+                detection_probability = detection_probability,
+                world_size = world_size)
