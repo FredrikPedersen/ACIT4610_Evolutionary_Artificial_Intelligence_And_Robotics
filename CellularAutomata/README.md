@@ -127,11 +127,31 @@ When handling an infected person, there are three possible outcomes: they die, t
 ### __create_health_value_array()
 The PyCX simulator utilizes Pyplot's imshow function to render the grid, and that only accepts an array with integer
 values. This function creates a 2D Numpy array with the health_state values from each person in the stateConfig in
-order to render a cells health state graphicly.
+order to render a cells health state graphically.
 
 In terms of effectiveness, looping through the entire stateConfig and retrieving the health_state value for every
 person object is abysmal. We will look into how to pass stateConfig directly to some Pyplot function if we get the time 
 for it.
+
+# Evolutionary Algorithm
+
+To make sure the simulation is as realistic as possible we have implemented an evolutionary algorithm which where the
+termination goals are based on the real behaviour of the COVID-19 outbreak in Norway.
+
+### Fitness
+
+The fitness of the current simulation is calculated by taking the difference between the simulation's number of infected
+and deaths, and their reported real world numbers. A fitness score closer to zero is considered better, as this means the 
+simulation is more accurate on a linear scale.
+
+### Evolution
+
+When evolving the simulation, we change the values of INFECTION_CHANCE and MORTALITY_CHANCE, as these are the two values
+directly impacting the infection and death rates. They are also the only numbers NOT based on any real research, and are
+prime targets for evolving the simulation to become more accurate.
+ 
+This off course means that we could let this simulation run once with the evolutionary algorithm enabled until we have 
+a perfect fitness score (0) and then hard code the values determined by the genetic algorithm as constants.  
 
 # Research, and how it is reflected in the simulation
 
