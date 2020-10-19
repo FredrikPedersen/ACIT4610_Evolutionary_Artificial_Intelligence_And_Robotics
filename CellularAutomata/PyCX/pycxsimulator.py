@@ -55,6 +55,7 @@ import warnings
 
 warnings.filterwarnings("ignore", category=matplotlib.cbook.MatplotlibDeprecationWarning)
 
+import covid_modelling.constants as constants
 
 class GUI:
 
@@ -248,6 +249,10 @@ class GUI:
                 self.buttonSaveParametersAndReset.configure(state=NORMAL)
 
     def stepModel(self):
+        if self.currentStep >= constants.DAYS_SINCE_OUTBREAK:
+            self.evolveModel()
+            return
+
         if self.running:
             self.modelStepFunc()
             self.currentStep += 1
@@ -258,6 +263,11 @@ class GUI:
             self.rootWindow.after(int(self.timeInterval * 1.0 / self.stepSize), self.stepModel)
 
     def stepOnce(self):
+        if self.currentStep >= constants.DAYS_SINCE_OUTBREAK:
+            self.modelEvolve()
+            self.resetModel("Simulation Reached Current Date... evolving")
+            return
+
         self.running = False
         self.runPauseString.set("Continue Run")
         self.modelStepFunc()
@@ -267,13 +277,18 @@ class GUI:
         if len(self.parameterSetters) > 0:
             self.buttonSaveParameters.configure(state=NORMAL)
 
-    def resetModel(self):
+    def resetModel(self, message="Model has been reset"):
         self.running = False
         self.runPauseString.set("Run")
         self.modelInitFunc()
         self.currentStep = 0
-        self.setStatusStr("Model has been reset")
+        self.setStatusStr(message)
         self.drawModel()
+
+    def evolveModel(self):
+        self.modelEvolve()
+        self.resetModel("Simulation Reached Current Date... evolving")
+        self.runEvent()
 
     def drawModel(self):
         plt.ion()  # SM 3/26/2020
@@ -286,10 +301,11 @@ class GUI:
         plt.show()  # bug fix by Hiroki Sayama in 2016 #SM 3/26/2020
 
     def start(self, func=[]):
-        if len(func) == 3:
+        if len(func) == 4:
             self.modelInitFunc = func[0]
             self.modelDrawFunc = func[1]
             self.modelStepFunc = func[2]
+            self.modelEvolve = func[3]
 
             if (self.modelStepFunc.__doc__ != None and len(self.modelStepFunc.__doc__) > 0):
                 self.showHelp(self.buttonStep, self.modelStepFunc.__doc__.strip())
