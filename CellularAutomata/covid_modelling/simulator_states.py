@@ -95,7 +95,7 @@ def evolve() -> None:
     global previousRuns
 
     previousRuns.append(SimulationRun(dead, infected))
-    ga.evolve_simulation(previousRuns)
+    # ga.evolve_simulation(previousRuns)
     return
 
 
@@ -120,6 +120,9 @@ def __handle_infected_person(person: Person) -> None:
 
     person.get_infection().update()
 
+    if person.get_infection().get_infection_stage() == constants.SYMPTOMS:
+        person.set_in_isolation(True)
+
 
 def __handle_healthy_person(person: Person, pos_y: int, pos_x: int) -> None:
     global infected
@@ -129,7 +132,9 @@ def __handle_healthy_person(person: Person, pos_y: int, pos_x: int) -> None:
             y = (pos_y + dy) % constants.AREA_DIMENSIONS
             x = (pos_x + dx) % constants.AREA_DIMENSIONS
 
-            if stateConfig[y][x].get_state() == HealthState.Infected:
+            neighbour: Person = stateConfig[y][x]
+
+            if (neighbour.get_state() == HealthState.Infected) and (not neighbour.get_in_isolation()):
 
                 infection_chance = constants.INFECTION_CHANCE
 
@@ -140,7 +145,7 @@ def __handle_healthy_person(person: Person, pos_y: int, pos_x: int) -> None:
                     infection_chance *= constants.DISTANCING_REDUCTION
 
                 # The neighbour must be in an infectious phase of the disease to infect someone
-                if random() < infection_chance and stateConfig[y][x].get_infection().get_infectious():
+                if random() < infection_chance and neighbour.get_infection().get_infectious():
                     person.become_infected()
                     infected += 1
 
