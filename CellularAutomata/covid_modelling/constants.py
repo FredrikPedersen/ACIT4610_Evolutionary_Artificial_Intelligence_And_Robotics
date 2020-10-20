@@ -14,8 +14,8 @@ AREA_DIMENSIONS: int = 100  # The simulation has nxn number of cells. AREA_DIMEN
 DAYS_SINCE_OUTBREAK: int = 230
 INIT_INFECTION_PROBABILITY: float = 0.01    # Arbitrary number for setting number of initially infected when the simulation starts.
 
-INFECTION_CHANCE: float = 0.3   # Percentage chance for a person to get infected when in contact with a sick person.
-MORTALITY_CHANCE: float = 0.03   # Modifier for checking if a person in a risk group will die from the virus
+INFECTION_CHANCE: float = 1.0   # Percentage chance for a person to get infected when in contact with a sick person.
+MORTALITY_CHANCE: float = 0.1   # Modifier for checking if a person in a risk group will die from the virus
 
 MASK_REDUCTION: float = 0.35    # Approx risk reduction of using a mask
 DISTANCING_REDUCTION: float = 0.5   # Couldn't find any hard data on how much a 1m social distance reduces self risk of infection. Varies between 40 - 80% depending on source and age group.

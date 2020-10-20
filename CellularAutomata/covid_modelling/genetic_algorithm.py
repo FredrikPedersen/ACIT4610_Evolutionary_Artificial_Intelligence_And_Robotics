@@ -2,13 +2,14 @@ import covid_modelling.constants as constants
 from typing import List
 from covid_modelling.simulation_run import SimulationRun
 
-
 # Data taken from FHI 19.10.2020.
 # Is based on the outbreak starting in week 10 in 2020 (2nd - 8th of March).
 
-TOTAL_POPULATION: int = 5328000
-REPORTED_CASES: int = 16456
-DEATHS: int = 278
+REPORTED_INFECTIONS: int = 1438
+REPORTED_DEATHS: int = 24
+
+stable_infection: int = 0    # Counter to keep track of if the simulation have been on par with the benchmarks.
+stable_death: int = 0
 
 
 def calculate_simulation_fitness(total_infected: int, total_deaths: int) -> int:
@@ -20,7 +21,8 @@ def calculate_simulation_fitness(total_infected: int, total_deaths: int) -> int:
     :return: difference between reported real numbers and simulation numbers.
     """
 
-    return __calculate_value_fitness(total_infected, REPORTED_CASES) + __calculate_value_fitness(total_deaths, DEATHS)
+    return __calculate_value_fitness(total_infected, REPORTED_INFECTIONS) + __calculate_value_fitness(total_deaths,
+                                                                                                      REPORTED_DEATHS)
 
 
 def __calculate_value_fitness(value: int, benchmark_value: int, absolute=True) -> int:
@@ -30,67 +32,48 @@ def __calculate_value_fitness(value: int, benchmark_value: int, absolute=True) -
         return value - benchmark_value
 
 
-def evolve_simulation(simulation_runs: List[SimulationRun]) -> List[SimulationRun]:
+def evolve_simulation(simulation_runs: List[SimulationRun]) -> None:
+    global stable_infection, stable_death
 
-    # We should a few sample runs before starting the optimization
-    if len(simulation_runs) > 2:
+    infection_chance_change: float = constants.INFECTION_CHANCE/10
+    mortality_chance_change: float = constants.MORTALITY_CHANCE/10
 
-        # Sort simulation_run list based on their fitness and keep only the two best parents.
-        for value in simulation_runs:
-            print(value.get_fitness())
+    previous_simulation: SimulationRun = simulation_runs[len(simulation_runs) - 1]
+    previous_simulation_deaths: int = previous_simulation.get_deaths()
+    previous_simulation_infected: int = previous_simulation.get_infected()
 
-        simulation_runs = sorted(simulation_runs, key=lambda parent: parent.get_fitness())[:2]
+    # By checking whether the infected and death rates are higher or lower than the benchmark values, increase
+    # or decrease INFECTION_CHANCE and/or MORTALITY_CHANCE accordingly.
+    infection_fitness = __calculate_value_fitness(previous_simulation_infected, REPORTED_INFECTIONS, False)
 
-        # Almost perfect simulation values found, no need to optimize.
-        if simulation_runs[0].get_fitness() < 200:
-            print("DONE")
-            return simulation_runs
+    if stable_death < 10 and stable_infection < 10:
 
-        best_simulation_deaths = simulation_runs[0].get_deaths()
-        best_simulation_infected = simulation_runs[0].get_infected()
-        second_best_simulation_deaths = simulation_runs[1].get_deaths()
-        second_best_simulation_infected = simulation_runs[1].get_infected()
+        # In case of some stray simulations, don't change the infection rate if there have been multiple stable runs
+        if infection_fitness < -200 and stable_infection < 10:
+            constants.INFECTION_CHANCE += infection_chance_change
+            stable_infection = 0
 
-        print(f"{simulation_runs[0].get_fitness()} and {simulation_runs[1].get_fitness()}")
+        elif infection_fitness > 200 and stable_infection < 10:
+            constants.INFECTION_CHANCE -= infection_chance_change
+            stable_infection = 0
 
-        # If the fitness value of the best simulation run is worse than that of the second best simulation run, MORTALITY_CHANCE must be changed
-        if __calculate_value_fitness(best_simulation_deaths, DEATHS) > __calculate_value_fitness(second_best_simulation_deaths, DEATHS):
-
-            # The fitness is worse and the death count is higher, reduce MORTALITY_CHANCE.
-            if best_simulation_deaths > second_best_simulation_deaths:
-                constants.MORTALITY_CHANCE -= 0.001
-
-            # The fitness is worse and the death count is lower, increase MORTALITY_CHANCE.
-            else:
-                constants.MORTALITY_CHANCE += 0.001
-
-        # If the fitness value of the best simulation run is worse than that of the second best simulation run, INFECTION_CHANCE must be changed
-        elif __calculate_value_fitness(best_simulation_infected, REPORTED_CASES) > __calculate_value_fitness(second_best_simulation_infected, REPORTED_CASES):
-
-            # The fitness is worse and the infection count is higher, reduce INFECTION_CHANCE.
-            if best_simulation_infected > second_best_simulation_infected:
-                constants.INFECTION_CHANCE -= 0.01
-
-            # The fitness is worse and the infection count is lower, increase INFECTION_CHANCE.
-            else:
-                constants.INFECTION_CHANCE += 0.01
-
-        # Best simulation run performs better than second best simulation run on both accounts, but is still not perfect
         else:
-            # By checking whether the infected and death rates are higher or lower than the benchmark values, increase
-            #or decrease INFECTION_CHANCE and/or MORTALITY_CHANCE accordingly.
 
-            if __calculate_value_fitness(best_simulation_infected, REPORTED_CASES, False) < 0:
-                constants.INFECTION_CHANCE += 0.01
+            stable_infection += 1
+
+            # The mortality rate is dependent on the infection rate (more infected people, more likely that people die)
+            # Changing the mortality chances when the infection rate is not stabled will lead to a lot of unnecessary
+            # adjustments, so we only do so when the infection rate is stable.
+            mortality_fitness = __calculate_value_fitness(previous_simulation_deaths, REPORTED_DEATHS, False)
+
+            if mortality_fitness < -10 and stable_death < 10:
+                constants.MORTALITY_CHANCE += mortality_chance_change
+                stable_death = 0
+
+            elif mortality_fitness > 10 and stable_death < 10:
+                constants.MORTALITY_CHANCE -= mortality_chance_change
+                stable_death = 0
+
             else:
-                constants.INFECTION_CHANCE -= 0.01
+                stable_death += 1
 
-            if __calculate_value_fitness(best_simulation_deaths, DEATHS, False) < 0:
-                constants.MORTALITY_CHANCE += 0.001
-            else:
-                constants.MORTALITY_CHANCE -= 0.001
-
-    else:
-        constants.INFECTION_CHANCE += 0.01
-        constants.MORTALITY_CHANCE += 0.001
-        return simulation_runs

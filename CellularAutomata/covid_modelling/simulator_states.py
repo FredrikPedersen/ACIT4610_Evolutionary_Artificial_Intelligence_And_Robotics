@@ -95,7 +95,7 @@ def evolve() -> None:
     global previousRuns
 
     previousRuns.append(SimulationRun(dead, infected))
-    # ga.evolve_simulation(previousRuns)
+    ga.evolve_simulation(previousRuns)
     return
 
 
