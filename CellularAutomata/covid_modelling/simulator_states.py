@@ -2,10 +2,13 @@ from typing import List
 
 from pylab import *
 
-import covid_modelling.constants as Constants
+import covid_modelling.constants as constants
 import pycx.pycxsimulator as pycx
+import covid_modelling.genetic_algorithm as ga
+
 from covid_modelling.health_state import HealthState
 from covid_modelling.person import Person
+from covid_modelling.simulation_run import SimulationRun
 
 timeStep: int
 dead: int
@@ -13,7 +16,12 @@ recovered: int
 total: int
 infected: int
 stateConfig: List[List[Person]]
+previousRuns: List[SimulationRun] = []
 
+"""
+Functions and dependencies in this file, together with the general thought process and behaviour of the entire 
+simulation is documented in README.
+"""
 
 def initialize() -> None:
     global timeStep, stateConfig, infected, dead, recovered, total
@@ -25,12 +33,12 @@ def initialize() -> None:
     total = 0
 
     # numpy arrays does not support objects, using a standard 2D-array instead
-    stateConfig = [[Person for i in range(Constants.AREA_DIMENSIONS)] for j in range(Constants.AREA_DIMENSIONS)]
+    stateConfig = [[Person for i in range(constants.AREA_DIMENSIONS)] for j in range(constants.AREA_DIMENSIONS)]
 
-    for posX in range(Constants.AREA_DIMENSIONS):
-        for posY in range(Constants.AREA_DIMENSIONS):
+    for posX in range(constants.AREA_DIMENSIONS):
+        for posY in range(constants.AREA_DIMENSIONS):
 
-            if random() < Constants.INIT_INFECTION_PROBABILITY:
+            if random() < constants.INIT_INFECTION_PROBABILITY:
                 stateConfig[posY][posX] = Person(HealthState.Infected)
                 infected += 1
             else:
@@ -56,8 +64,8 @@ def update() -> None:
 
     timeStep += 1
 
-    for posX in range(Constants.AREA_DIMENSIONS):
-        for posY in range(Constants.AREA_DIMENSIONS):
+    for posX in range(constants.AREA_DIMENSIONS):
+        for posY in range(constants.AREA_DIMENSIONS):
 
             person: Person = stateConfig[posY][posX]
             current_health_state: HealthState = person.get_state()
@@ -83,6 +91,14 @@ def update() -> None:
             stateConfig[posY][posX] = person
 
 
+def evolve() -> None:
+    global previousRuns
+
+    previousRuns.append(SimulationRun(dead, infected))
+    ga.evolve_simulation(previousRuns)
+    return
+
+
 def __handle_infected_person(person: Person) -> None:
     global dead
     global recovered
@@ -96,13 +112,16 @@ def __handle_infected_person(person: Person) -> None:
 
     # An infected person has a chance of recovering after they have been sick for the average duration of COVID-19, and
     # they roll a sufficient random number. Chances of going into recovery becomes higher the longer they are sick.
-    elif infection_duration >= Constants.AVERAGE_DURATION:
-        if random() < (Constants.RECOVERY_CHANCE + (infection_duration - Constants.INCUBATION_DURATION) / 200):
+    elif infection_duration >= constants.AVERAGE_DURATION:
+        if random() < (constants.RECOVERY_CHANCE + (infection_duration - constants.INCUBATION_DURATION) / 200):
             person.become_recovered()
             recovered += 1
             return
 
     person.get_infection().update()
+
+    if person.get_infection().get_infection_stage() == constants.SYMPTOMS:
+        person.set_in_isolation(True)
 
 
 def __handle_healthy_person(person: Person, pos_y: int, pos_x: int) -> None:
@@ -110,28 +129,30 @@ def __handle_healthy_person(person: Person, pos_y: int, pos_x: int) -> None:
 
     for dx in range(-1, 2):
         for dy in range(-1, 2):
-            y = (pos_y + dy) % Constants.AREA_DIMENSIONS
-            x = (pos_x + dx) % Constants.AREA_DIMENSIONS
+            y = (pos_y + dy) % constants.AREA_DIMENSIONS
+            x = (pos_x + dx) % constants.AREA_DIMENSIONS
 
-            if stateConfig[y][x].get_state() == HealthState.Infected:
+            neighbour: Person = stateConfig[y][x]
 
-                infection_chance = Constants.INFECTION_CHANCE
+            if (neighbour.get_state() == HealthState.Infected) and (not neighbour.get_in_isolation()):
+
+                infection_chance = constants.INFECTION_CHANCE
 
                 if person.get_wearing_mask():
-                    infection_chance *= Constants.MASK_REDUCTION
+                    infection_chance *= constants.MASK_REDUCTION
 
                 if person.get_social_distancing():
-                    infection_chance *= Constants.DISTANCING_REDUCTION
+                    infection_chance *= constants.DISTANCING_REDUCTION
 
                 # The neighbour must be in an infectious phase of the disease to infect someone
-                if random() < infection_chance and stateConfig[y][x].get_infection().get_infectious():
+                if random() < infection_chance and neighbour.get_infection().get_infectious():
                     person.become_infected()
                     infected += 1
 
 
 def __create_health_value_array() -> ndarray:
     global stateConfig
-    health_values: ndarray = zeros([Constants.AREA_DIMENSIONS, Constants.AREA_DIMENSIONS], int)
+    health_values: ndarray = zeros([constants.AREA_DIMENSIONS, constants.AREA_DIMENSIONS], int)
 
     for columns in range(len(stateConfig)):
         for rows in range(len(stateConfig[columns])):
@@ -140,4 +161,4 @@ def __create_health_value_array() -> ndarray:
     return health_values
 
 
-pycx.GUI().start(func=[initialize, observe, update])
+pycx.GUI().start(func=[initialize, observe, update, evolve])

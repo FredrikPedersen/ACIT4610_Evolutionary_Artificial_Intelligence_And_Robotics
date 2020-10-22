@@ -13,6 +13,7 @@ class Person:
         self.__wearing_mask: bool = bool(random.getrandbits(1))
         self.__age = int(random.random() * 100)
         self.__infection: Infection = Infection()
+        self.__in_isolation: bool = False
 
         #   Random check to see if the person belongs in a risk group
         if random.random() < Constants.MORTAL_RISK_GROUP_PERCENTAGE:
@@ -54,8 +55,14 @@ class Person:
     def get_risk_group(self) -> bool:
         return self.__risk_group
 
+    def get_in_isolation(self) -> bool:
+        return self.__in_isolation
+
     def set_state(self, state: HealthState):
         self.__state = state
+
+    def set_in_isolation(self, in_isolation: bool):
+        self.__in_isolation = in_isolation
 
     def __str__(self):
         return "Age: " + str(self.__age) + " Infection: " + str(self.__infection) + " State: " + str(self.__state.value)

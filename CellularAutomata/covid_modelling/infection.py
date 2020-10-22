@@ -1,16 +1,13 @@
-import covid_modelling.constants as Constants
+import covid_modelling.constants as constants
 
 
 class Infection:
 
-    __INCUBATION: str = "Incubation"
-    __SYMPTOMS: str = "Symptoms"
-
     def __init__(self):
         self.__duration: int = 0
-        self.__infection_stage: str = self.__INCUBATION
+        self.__infection_stage: str = constants.INCUBATION
         self.__infectious: bool = False
-        self.__lethal: bool = False     # If the infection will be lethal for the person
+        self.__lethal: bool = False
 
     def update(self, active_infection=True) -> None:
         if active_infection:
@@ -19,11 +16,14 @@ class Infection:
             self.__update_infectious()
         else:
             self.__duration = 0
-            self.__infection_stage = self.__INCUBATION
+            self.__infection_stage = constants.INCUBATION
             self.__infectious = False
 
     def get_duration(self) -> int:
         return self.__duration
+
+    def get_infection_stage(self) -> str:
+        return self.__infection_stage
 
     def get_infectious(self) -> bool:
         return self.__infectious
@@ -35,14 +35,14 @@ class Infection:
         self.__lethal = lethal
 
     def __update_infection_stage(self) -> None:
-        if self.__duration > Constants.INCUBATION_DURATION:
-            self.__infection_stage = self.__SYMPTOMS
+        if self.__duration > constants.INCUBATION_DURATION:
+            self.__infection_stage = constants.SYMPTOMS
 
         else:
-            self.__infection_stage = self.__INCUBATION
+            self.__infection_stage = constants.INCUBATION
 
     def __update_infectious(self) -> None:
-        if self.__duration > Constants.INFECTIOUS_START:
+        if self.__duration > constants.INFECTIOUS_START:
             self.__infectious = True
 
         else:

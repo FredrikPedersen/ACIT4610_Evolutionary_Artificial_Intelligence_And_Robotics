@@ -127,11 +127,51 @@ When handling an infected person, there are three possible outcomes: they die, t
 ### __create_health_value_array()
 The PyCX simulator utilizes Pyplot's imshow function to render the grid, and that only accepts an array with integer
 values. This function creates a 2D Numpy array with the health_state values from each person in the stateConfig in
-order to render a cells health state graphicly.
+order to render a cells health state graphically.
 
 In terms of effectiveness, looping through the entire stateConfig and retrieving the health_state value for every
 person object is abysmal. We will look into how to pass stateConfig directly to some Pyplot function if we get the time 
 for it.
+
+# Evolutionary Algorithm
+
+To make sure the simulation is as realistic as possible we have implemented an evolutionary algorithm where the
+termination goals are based on the real behaviour of the COVID-19 outbreak in Norway. The algorithm tries to 
+figure out the most optimal values for INFECTION_CHANCE and MORTALITY_CHANCE by comparing the results (number of 
+infected and dead) of the simulation. These two values are prime targets for evolving the simulation to become more 
+accurate as they directly impact the infection and death rates. They are also the only variables NOT based on any real 
+research. 
+
+We pulled data on the outbreak from the Norwegian Institute of Public Health on October 18th 2020, and consider March 
+2nd 2020 to be the start of the Norwegian outbreak. On step 230 of the simulation (the difference between March 2nd and 
+October 18th), the run is terminated. We then assess the fitness of the simulation run and adjust infection and 
+mortality constants accordingly. This process repeats after each run until we have an acceptable fitness score. 
+
+### Fitness
+
+The fitness of the simulation is calculated by taking the difference between the simulation's number of infected
+and deaths, and their reported real world numbers. A fitness score closer to zero is considered better, as this means 
+the simulation is more accurate on a linear scale.
+
+### Evolution
+
+When evolving the simulation, we only take the previous simulation run into consideration. 
+
+First the fitness of the total number of infected is calculated. A value of 0 +/- 200 is considered acceptable.
+If the fitness is not acceptable, the INFECTION_CHANCE is changed increased or decreased by 1/10 of it's current value 
+based on if it breaks the upper or lower bound.
+
+When an acceptable fitness is achieved for infection values, we move on the death values, as death values are directly 
+impacted by the infection values (more infected cells = more chances of cells dying). Changing these before the optimal
+infection values are determined would just result in redundant adjustments to MORTALITY_CHANCE. For the mortality rate
+fitness, 0 +/- 10 are considered acceptable values.
+
+Due to the somewhat random nature of the simulation (i.e. it is a random value being compared to INFECTION_CHANCE to 
+determine whether a healthy cell is infected by a diseased cell), there might be simulation runs where the boundaries of
+the acceptable values are breached, even after a value which yields an acceptable fitness is reached. To prevent a
+single run with lots of irregularly high random numbers, we added a value to track how many stable runs (runs with 
+acceptable fitness values) there has been in a row. If there have been 5 or more stable runs, INFECTION_CHANCE and
+MORTALITY_CHANCE won't be changed any further. 
 
 # Research, and how it is reflected in the simulation
 
