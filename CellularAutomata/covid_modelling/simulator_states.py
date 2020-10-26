@@ -5,7 +5,7 @@ from pylab import *
 import covid_modelling.constants as constants
 import covid_modelling.variables as variables
 import pycx.pycxsimulator as pycx
-import covid_modelling.evolutionary_algorithm as ga
+from covid_modelling.evolutionary_algorithm import EvolutionaryAlgorithm
 
 from covid_modelling.health_state import HealthState
 from covid_modelling.person import Person
@@ -18,6 +18,7 @@ total: int
 infected: int
 stateConfig: List[List[Person]]
 previousRuns: List[SimulationRun] = []
+ea: EvolutionaryAlgorithm = EvolutionaryAlgorithm()
 
 
 def initialize() -> None:
@@ -52,7 +53,7 @@ def observe() -> None:
     axis("image")
 
     mortality_rate_percent: float = round((dead/infected)*100, 2)
-    title(f"Days: {timeStep} Times Run: {ga.number_of_evolutions}\n "
+    title(f"Days: {timeStep} Times Run: {ea.get_number_of_evolutions()}\n "
           f"Total Infected: {infected} Dead: {dead} Recovered: {recovered}\n "
           f"Mortality Rate: {mortality_rate_percent}%\n"
           f"Infection Chance: {round(variables.INFECTION_CHANCE,4)} Mortality Chance: {round(variables.MORTALITY_CHANCE, 4)}")
@@ -94,7 +95,7 @@ def evolve() -> None:
     global previousRuns
 
     previousRuns.append(SimulationRun(dead, infected))
-    ga.evolve_simulation(previousRuns)
+    ea.evolve_simulation(previousRuns)
     return
 
 
