@@ -179,7 +179,7 @@ MORTALITY_CHANCE won't be changed any further.
 
 In the simulation, each time step simulates one day.
 The average course of the coronavirus after contracting the virus is according to our research as follows:
-5-6 Days Incubation Period
+5 Days Incubation Period
 14 Days with Symptoms
 
 A person is usually infectious a few days before symptom onset, and until they stop
@@ -196,6 +196,8 @@ Both dead and recovered patients are thus considered inactive cells, and are rep
 ### Sources
 [Reinfection](https://theconversation.com/coronavirus-reinfection-what-it-actually-means-and-why-you-shouldnt-panic-144965)  
 [Mask Reduction Chance](https://www.ucdavis.edu/coronavirus/news/your-mask-cuts-own-risk-65-percent/)  
-[Risk Groups](https://forskning.no/sykdommer-virus/hvem-er-egentlig-i-risikogruppen-for-korona/1659901)  
+[Risk Groups](https://forskning.no/sykdommer-virus/hvem-er-egentlig-i-risikogruppen-for-korona/1659901) 
+[Virus Progression](https://www.cdc.gov/coronavirus/2019-ncov/hcp/clinical-guidance-management-patients.html)   
+[Corona Stats Norway](https://www.fhi.no/en/id/infectious-diseases/coronavirus/daily-reports/daily-reports-COVID19/)  
   
  

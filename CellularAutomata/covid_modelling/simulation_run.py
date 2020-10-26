@@ -1,4 +1,3 @@
-import covid_modelling.genetic_algorithm as ga
 import covid_modelling.constants as constants
 
 

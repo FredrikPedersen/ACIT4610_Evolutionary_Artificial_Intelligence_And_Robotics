@@ -3,8 +3,9 @@ from typing import List
 from pylab import *
 
 import covid_modelling.constants as constants
+import covid_modelling.variables as variables
 import pycx.pycxsimulator as pycx
-import covid_modelling.genetic_algorithm as ga
+import covid_modelling.evolutionary_algorithm as ga
 
 from covid_modelling.health_state import HealthState
 from covid_modelling.person import Person
@@ -18,10 +19,6 @@ infected: int
 stateConfig: List[List[Person]]
 previousRuns: List[SimulationRun] = []
 
-"""
-Functions and dependencies in this file, together with the general thought process and behaviour of the entire 
-simulation is documented in README.
-"""
 
 def initialize() -> None:
     global timeStep, stateConfig, infected, dead, recovered, total
@@ -55,8 +52,10 @@ def observe() -> None:
     axis("image")
 
     mortality_rate_percent: float = round((dead/infected)*100, 2)
-    title(f"Days: {timeStep}\n Total Infected: {infected} Dead: {dead} Recovered: {recovered}\n "
-          f"Mortality Rate: {mortality_rate_percent} %")
+    title(f"Days: {timeStep} Times Run: {ga.number_of_evolutions}\n "
+          f"Total Infected: {infected} Dead: {dead} Recovered: {recovered}\n "
+          f"Mortality Rate: {mortality_rate_percent}%\n"
+          f"Infection Chance: {round(variables.INFECTION_CHANCE,4)} Mortality Chance: {round(variables.MORTALITY_CHANCE, 4)}")
 
 
 def update() -> None:
@@ -113,7 +112,7 @@ def __handle_infected_person(person: Person) -> None:
     # An infected person has a chance of recovering after they have been sick for the average duration of COVID-19, and
     # they roll a sufficient random number. Chances of going into recovery becomes higher the longer they are sick.
     elif infection_duration >= constants.AVERAGE_DURATION:
-        if random() < (constants.RECOVERY_CHANCE + (infection_duration - constants.INCUBATION_DURATION) / 200):
+        if random() < (variables.RECOVERY_CHANCE + (infection_duration - constants.INCUBATION_DURATION) / 200):
             person.become_recovered()
             recovered += 1
             return
@@ -136,7 +135,7 @@ def __handle_healthy_person(person: Person, pos_y: int, pos_x: int) -> None:
 
             if (neighbour.get_state() == HealthState.Infected) and (not neighbour.get_in_isolation()):
 
-                infection_chance = constants.INFECTION_CHANCE
+                infection_chance = variables.INFECTION_CHANCE
 
                 if person.get_wearing_mask():
                     infection_chance *= constants.MASK_REDUCTION

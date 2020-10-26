@@ -10,18 +10,23 @@ class Person:
         self.__state: HealthState = state
 
         self.__social_distancing: bool = bool(random.getrandbits(1))
-        self.__wearing_mask: bool = bool(random.getrandbits(1))
         self.__age = int(random.random() * 100)
         self.__infection: Infection = Infection()
         self.__in_isolation: bool = False
 
-        #   Random check to see if the person belongs in a risk group
+        #  Random check to see if the person is wearing a mask
+        if random.random() < Constants.PERCENTAGE_USING_MASKS:
+            self.__wearing_mask = True
+        else:
+            self.__wearing_mask = False
+
+        #  Random check to see if the person belongs in a risk group
         if random.random() < Constants.MORTAL_RISK_GROUP_PERCENTAGE:
             self.__risk_group = True
         else:
             self.__risk_group = False
 
-        #   Determine whether the virus would be lethal to this person
+        #  Determine whether the virus would be lethal to this person
         if self.__risk_group or self.__age > Constants.MORTAL_RISK_AGE:
             if random.random() < Constants.MORTALITY_CHANCE:
                 self.__infection.set_lethal(True)

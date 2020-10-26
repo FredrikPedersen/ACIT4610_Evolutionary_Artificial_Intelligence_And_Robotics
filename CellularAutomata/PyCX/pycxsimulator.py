@@ -55,7 +55,7 @@ import warnings
 
 warnings.filterwarnings("ignore", category=matplotlib.cbook.MatplotlibDeprecationWarning)
 
-import covid_modelling.constants as constants
+import covid_modelling.variables as variables
 
 class GUI:
 
@@ -249,7 +249,7 @@ class GUI:
                 self.buttonSaveParametersAndReset.configure(state=NORMAL)
 
     def stepModel(self):
-        if self.currentStep >= constants.DAYS_SINCE_OUTBREAK:
+        if self.currentStep >= variables.STEP_LIMIT:
             self.evolveModel()
             return
 
@@ -263,9 +263,8 @@ class GUI:
             self.rootWindow.after(int(self.timeInterval * 1.0 / self.stepSize), self.stepModel)
 
     def stepOnce(self):
-        if self.currentStep >= constants.DAYS_SINCE_OUTBREAK:
-            self.modelEvolve()
-            self.resetModel("Simulation Reached Current Date... evolving")
+        if self.currentStep >= variables.STEP_LIMIT:
+            self.evolveModel()
             return
 
         self.running = False
