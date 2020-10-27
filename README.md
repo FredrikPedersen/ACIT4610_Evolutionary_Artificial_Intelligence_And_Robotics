@@ -4,7 +4,3 @@ Repo for the semester project done in [ACIT4610 - Evolotionary AI and Robotics](
 
 The project is based around using Complex Systems Models to create a somewhat realistic epidemic model of the Covid-19 Pandemic.
 Readme will be updated when the project is finished.
-
-```Bash
-$ cd myrepo
-```
