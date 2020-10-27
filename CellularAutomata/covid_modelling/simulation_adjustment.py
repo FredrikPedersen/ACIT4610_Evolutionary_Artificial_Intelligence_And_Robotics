@@ -20,9 +20,8 @@ class SimulationAdjustment:
         self.__number_of_adjustments += 1
         previous_simulation: SimulationRun = simulation_runs[len(simulation_runs) - 1]
 
-
-        # if self.__adjust_infection_chance(previous_simulation_infected) and self.__adjust_mortality_chance(previous_simulation):
-        variables.ADJUSTMENTS_COMPLETE = True
+        if self.__adjust_infection_chance(previous_simulation) and self.__adjust_mortality_chance(previous_simulation):
+            variables.ADJUSTMENTS_COMPLETE = True
 
     # evolve_simulation
 

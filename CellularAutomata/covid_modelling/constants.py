@@ -10,10 +10,13 @@ SYMPTOMS: str = "Symptoms"
 
 # Simulation constants
 AREA_DIMENSIONS: int = 100  # The simulation has nxn number of cells. AREA_DIMENSIONS = n.
-DAYS_SINCE_OUTBREAK: int = 239  # We consider march 2nd as the pandemic start in Norway. Data was pulled 27.10.2020.
+DAYS_SINCE_OUTBREAK: int = 10  # We consider march 2nd as the pandemic start in Norway. Data was pulled 27.10.2020.
 REPORTED_INFECTIONS: int = 17843
 REPORTED_DEATHS: int = 279
 INIT_INFECTION_PROBABILITY: float = 0.01  # Arbitrary number for setting number of initially infected when the simulation starts.
+MASK_MEASURE: str = "Wearing Mask"
+SOCIAL_DISTANCE_MEASURE: str = "Social Distancing"
+ISOLATION_MEASURE: str = "Isolation"
 
 MASK_REDUCTION: float = 0.35  # Approx risk reduction of using a mask
 DISTANCING_REDUCTION: float = 0.5  # Couldn't find any hard data on how much a 1m social distance reduces self risk of infection. Varies between 40 - 80% depending on source and age group.

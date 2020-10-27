@@ -8,6 +8,7 @@ import pycx.pycxsimulator as pycx
 
 from covid_modelling.simulation_adjustment import SimulationAdjustment
 from covid_modelling.evolutionaryalgorithm import EvolutionaryAlgorithm
+from covid_modelling.preventive_measures import PreventiveMeasures
 from covid_modelling.health_state import HealthState
 from covid_modelling.person import Person
 from covid_modelling.simulation_run import SimulationRun
@@ -15,54 +16,57 @@ from covid_modelling.simulation_run import SimulationRun
 timeStep: int
 dead: int
 recovered: int
-total: int
 infected: int
 stateConfig: List[List[Person]]
+allPeople: List[Person]
 previousRuns: List[SimulationRun] = []
 adjustments: SimulationAdjustment = SimulationAdjustment()
 evolution: EvolutionaryAlgorithm = EvolutionaryAlgorithm()
 
 
 def initialize() -> None:
-    global timeStep, stateConfig, infected, dead, recovered, total
+    global timeStep, stateConfig, infected, dead, recovered, allPeople
     timeStep = 0
     infected = 0
     dead = 0
     recovered = 0
-    total = 0
 
     # numpy arrays does not support objects, using a standard 2D-array instead
     stateConfig = [[Person for i in range(constants.AREA_DIMENSIONS)] for j in range(constants.AREA_DIMENSIONS)]
+    allPeople = []
 
     for posX in range(constants.AREA_DIMENSIONS):
         for posY in range(constants.AREA_DIMENSIONS):
 
+            person: Person
             if random() < constants.INIT_INFECTION_PROBABILITY:
-                stateConfig[posY][posX] = Person(HealthState.Infected)
+                person = Person(HealthState.Infected)
+                stateConfig[posY][posX] = person
                 infected += 1
             else:
-                stateConfig[posY][posX] = Person(HealthState.Healthy)
+                person = Person(HealthState.Healthy)
+                stateConfig[posY][posX] = person
 
-            total += 1
+            allPeople.append(person)
 
 
 def observe() -> None:
     health_values: ndarray = __create_health_value_array()
+    reproduction_rate: float = round(__calculate_r0(), 2)
+    mortality_rate_percent: float = round((dead/infected)*100, 2)
 
     cla()
     imshow(health_values, vmin=0, vmax=len(HealthState), cmap=cm.jet)
     axis("image")
 
-    mortality_rate_percent: float = round((dead/infected)*100, 2)
-    title(f"Days: {timeStep}\n "
+    title(f"Days: {timeStep} R0: {reproduction_rate} \n"
           f"Total Infected: {infected} Dead: {dead} Recovered: {recovered}\n "
           f"Mortality Rate: {mortality_rate_percent}%\n"
           f"Infection Chance: {round(variables.INFECTION_CHANCE,4)} Mortality Chance: {round(variables.MORTALITY_CHANCE, 4)}")
 
 
 def update() -> None:
-    global timeStep, stateConfig, total
-
+    global timeStep, stateConfig
     timeStep += 1
 
     for posX in range(constants.AREA_DIMENSIONS):
@@ -87,25 +91,27 @@ def update() -> None:
             else:
                 #   Replace dead or recovered cells with new ones
                 person = Person(HealthState.Healthy)
-                total += 1
+                allPeople.append(person)
 
             stateConfig[posY][posX] = person
 
-    print(variables.ADJUSTMENTS_COMPLETE)
     if timeStep == variables.STEP_LIMIT:
-        previousRuns.append(SimulationRun(dead, infected))
+        previousRuns.append(SimulationRun(len(allPeople), dead, infected, __calculate_r0()))
+        preventive_measures: PreventiveMeasures = PreventiveMeasures.get_instance()
+        preventive_measures.update()
+
 
 
 def adjust() -> None:
     if not variables.ADJUSTMENTS_COMPLETE:
         print("ADJUSTING")
-        variables.ADJUSTMENTS_COMPLETE = adjustments.adjust_simulation(previousRuns)
+        adjustments.adjust_simulation(previousRuns)
 
 
 def evolve() -> None:
     if variables.ADJUSTMENTS_COMPLETE:
         print("EVOLVING")
-        evolution.evolve_mask_usage()
+        evolution.evolve(previousRuns)
 
     return
 
@@ -131,7 +137,7 @@ def __handle_infected_person(person: Person) -> None:
 
     person.get_infection().update()
 
-    if person.get_infection().get_infection_stage() == constants.SYMPTOMS:
+    if person.get_infection().get_infection_stage() == constants.SYMPTOMS and variables.MANDATORY_ISOLATION:
         person.set_in_isolation(True)
 
 
@@ -171,6 +177,17 @@ def __create_health_value_array() -> ndarray:
             health_values[columns, rows] = stateConfig[columns][rows].get_state().value
 
     return health_values
+
+
+def __calculate_r0() -> float:
+    infections_spread = 0
+
+    for person in allPeople:
+        person_state: HealthState = person.get_state()
+        if person_state == HealthState.Infected or person_state == HealthState.Dead or person_state == HealthState.Recovered:
+            infections_spread += person.get_infection_spread()
+
+    return infections_spread/infected
 
 
 pycx.GUI().start(func=[initialize, observe, update, adjust, evolve])

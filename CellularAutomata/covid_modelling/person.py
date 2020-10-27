@@ -51,6 +51,9 @@ class Person:
     def get_state(self) -> HealthState:
         return self.__state
 
+    def get_infection_spread(self) -> int:
+        return self.__infection_spread
+
     def get_social_distancing(self) -> bool:
         return self.__social_distancing
 
