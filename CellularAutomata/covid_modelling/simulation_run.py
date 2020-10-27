@@ -13,10 +13,12 @@ class SimulationRun:
         self.__deaths: int = deaths
         self.__infected: int = infected
         self.__reproduction_rate: float = reproduction_rate
+
         self.__infection_chance: float = variables.INFECTION_CHANCE
         self.__mortality_chance: float = variables.MORTALITY_CHANCE
         self.__percentage_masks: float = variables.PERCENTAGE_USING_MASKS
         self.__percentage_social_distancing: float = variables.PERCENTAGE_SOCIAL_DISTANCING
+        self.__mandatory_isolation: bool = variables.MANDATORY_ISOLATION
 
     def get_total_people(self) -> int:
         return self.__total_people
@@ -41,6 +43,9 @@ class SimulationRun:
 
     def get_percentage_social_distancing(self) -> float:
         return self.__percentage_social_distancing
+
+    def get_mandatory_isolation(self) -> bool:
+        return self.__mandatory_isolation
 
     def get_fitness_score(self) -> float:
         if self.__fitness_score is None:
