@@ -7,7 +7,7 @@ import covid_modelling.variables as variables
 import pycx.pycxsimulator as pycx
 
 from covid_modelling.simulation_adjustment import SimulationAdjustment
-from covid_modelling.evolutionaryalgorithm import EvolutionaryAlgorithm
+from covid_modelling.evolutionaryalgorithm import evolve as evolveSimulation
 from covid_modelling.preventive_measures import PreventiveMeasures
 from covid_modelling.health_state import HealthState
 from covid_modelling.person import Person
@@ -22,7 +22,6 @@ stateConfig: List[List[Person]]
 allPeople: List[Person]
 previousRuns: List[SimulationRun] = []
 adjustments: SimulationAdjustment = SimulationAdjustment()
-evolution: EvolutionaryAlgorithm = EvolutionaryAlgorithm()
 fitnessUtility: FitnessUtility = FitnessUtility()
 
 
@@ -32,9 +31,6 @@ def initialize() -> None:
     infected = 0
     dead = 0
     recovered = 0
-
-    for runs in previousRuns:
-        print(runs.get_inconvenience_scores())
 
     # numpy arrays does not support objects, using a standard 2D-array instead
     stateConfig = [[Person for i in range(constants.AREA_DIMENSIONS)] for j in range(constants.AREA_DIMENSIONS)]
@@ -116,7 +112,7 @@ def adjust() -> None:
 def evolve() -> None:
     if variables.ADJUSTMENTS_COMPLETE:
         print("EVOLVING")
-        evolution.evolve(previousRuns)
+        evolveSimulation(previousRuns)
 
     return
 
