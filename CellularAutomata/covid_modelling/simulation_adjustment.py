@@ -22,7 +22,7 @@ class EvolutionaryAlgorithm:
 
         # Simulation is reaching nearly realistic numbers, no need to evolve it any further
         if self.__stable_death >= 5 and self.__stable_infection >= 5:
-            variables.STEP_LIMIT = 1000
+            variables.STEP_LIMIT = 730
             return
 
         self.__number_of_evolutions += 1
@@ -35,7 +35,6 @@ class EvolutionaryAlgorithm:
             self.__evolve_mortality_chance(previous_simulation_deaths)
 
     # evolve_simulation
-
 
     def __calculate_benchmark_fitness(self, value: int, benchmark_value: int, absolute=True) -> int:
         if absolute:
@@ -104,7 +103,6 @@ class EvolutionaryAlgorithm:
         return True
 
     # __evolve_mortality_chance
-
 
     def get_number_of_evolutions(self) -> int:
         return self.__number_of_evolutions
