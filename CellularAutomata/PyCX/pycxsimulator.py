@@ -133,9 +133,15 @@ class GUI:
 
         # buttonAdjustments
         self.adjustmentsEnabled = not variables.ADJUSTMENTS_COMPLETE
-        self.buttonAdjustments = Button(self.frameRun, width=30, height=2, text='Disable Adjustments', command=self.disableAdjustments)
+
+        self.toggleAdjustmentsString = StringVar(self.rootWindow)
+        self.toggleAdjustmentsString.set("Disable Adjustments")
+        if not self.adjustmentsEnabled:
+            self.toggleAdjustmentsString.set("Enable Adjustments")
+
+        self.buttonAdjustments = Button(self.frameRun, width=30, height=2, textvariable=self.toggleAdjustmentsString, command=self.toggleAdjustments)
         self.buttonAdjustments.pack(side=TOP, padx=5, pady=5)
-        self.showHelp(self.buttonAdjustments, "Disables simulation adjustments")
+        self.showHelp(self.buttonAdjustments, "Toggles simulation adjustments")
 
         # -----------------------------------
         # frameSettings
@@ -243,9 +249,7 @@ class GUI:
             self.runPauseString.set("Pause")
             self.buttonStep.configure(state=DISABLED)
             self.buttonReset.configure(state=DISABLED)
-
-            if self.adjustmentsEnabled:
-                self.buttonAdjustments.configure(state=DISABLED)
+            self.buttonAdjustments.configure(state=DISABLED)
 
             if len(self.parameterSetters) > 0:
                 self.buttonSaveParameters.configure(state=NORMAL)
@@ -254,9 +258,7 @@ class GUI:
             self.runPauseString.set("Continue Run")
             self.buttonStep.configure(state=NORMAL)
             self.buttonReset.configure(state=NORMAL)
-
-            if self.adjustmentsEnabled:
-                self.buttonAdjustments.configure(state=NORMAL)
+            self.buttonAdjustments.configure(state=NORMAL)
 
             if len(self.parameterSetters) > 0:
                 self.buttonSaveParameters.configure(state=NORMAL)
@@ -298,7 +300,6 @@ class GUI:
         self.modelInitFunc()
         self.currentStep = 0
         self.adjustmentsEnabled = True
-        self.buttonAdjustments.configure(state=NORMAL)
         variables.ADJUSTMENTS_COMPLETE = False
         self.setStatusStr(message)
         self.drawModel()
@@ -308,11 +309,15 @@ class GUI:
         self.resetModel("Simulation Reached Current Date... adjusting")
         self.runEvent()
 
-    def disableAdjustments(self):
-        self.adjustmentsEnabled = False
-        self.buttonAdjustments.configure(state=DISABLED)
-        if not variables.ADJUSTMENTS_COMPLETE:
-            variables.ADJUSTMENTS_COMPLETE = True
+    def toggleAdjustments(self):
+        self.adjustmentsEnabled = not self.adjustmentsEnabled
+
+        if not self.adjustmentsEnabled:
+            self.toggleAdjustmentsString.set("Enable Adjustments")
+        else:
+            self.toggleAdjustmentsString.set("Disable Adjustments")
+
+        variables.ADJUSTMENTS_COMPLETE = not self.adjustmentsEnabled
 
     def drawModel(self):
         plt.ion()  # SM 3/26/2020
