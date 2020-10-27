@@ -26,7 +26,9 @@ class PreventiveMeasures:
         self.__preventive_measures.append(
         self.PreventiveMeasure(constants.MASK_MEASURE, 0.5, Group.Everyone, variables.PERCENTAGE_USING_MASKS))
         self.__preventive_measures.append(self.PreventiveMeasure(constants.SOCIAL_DISTANCE_MEASURE, 0.4, Group.Everyone, variables.PERCENTAGE_SOCIAL_DISTANCING))
-        self.__preventive_measures.append(self.PreventiveMeasure(constants.ISOLATION_MEASURE, 1.0, Group.Infected))
+
+        if variables.MANDATORY_ISOLATION:
+            self.__preventive_measures.append(self.PreventiveMeasure(constants.ISOLATION_MEASURE, 1.0, Group.Infected))
 
     def get_preventive_measures(self):
         return self.__preventive_measures

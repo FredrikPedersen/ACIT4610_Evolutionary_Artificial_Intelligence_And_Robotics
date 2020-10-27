@@ -12,6 +12,7 @@ from covid_modelling.preventive_measures import PreventiveMeasures
 from covid_modelling.health_state import HealthState
 from covid_modelling.person import Person
 from covid_modelling.simulation_run import SimulationRun
+from covid_modelling.fitness_utility import FitnessUtility
 
 timeStep: int
 dead: int
@@ -22,6 +23,7 @@ allPeople: List[Person]
 previousRuns: List[SimulationRun] = []
 adjustments: SimulationAdjustment = SimulationAdjustment()
 evolution: EvolutionaryAlgorithm = EvolutionaryAlgorithm()
+fitnessUtility: FitnessUtility = FitnessUtility()
 
 
 def initialize() -> None:
@@ -30,6 +32,9 @@ def initialize() -> None:
     infected = 0
     dead = 0
     recovered = 0
+
+    for runs in previousRuns:
+        print(runs.get_inconvenience_scores())
 
     # numpy arrays does not support objects, using a standard 2D-array instead
     stateConfig = [[Person for i in range(constants.AREA_DIMENSIONS)] for j in range(constants.AREA_DIMENSIONS)]
@@ -96,7 +101,8 @@ def update() -> None:
             stateConfig[posY][posX] = person
 
     if timeStep == variables.STEP_LIMIT:
-        previousRuns.append(SimulationRun(len(allPeople), dead, infected, __calculate_r0()))
+        current_run = fitnessUtility.calculate_and_update_fitness(SimulationRun(len(allPeople), dead, infected, __calculate_r0()))
+        previousRuns.append(current_run)
         preventive_measures: PreventiveMeasures = PreventiveMeasures.get_instance()
         preventive_measures.update()
 
