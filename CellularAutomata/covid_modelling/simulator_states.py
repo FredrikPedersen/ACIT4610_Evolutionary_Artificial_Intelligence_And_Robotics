@@ -5,8 +5,9 @@ from pylab import *
 import covid_modelling.constants as constants
 import covid_modelling.variables as variables
 import pycx.pycxsimulator as pycx
-from covid_modelling.evolutionary_algorithm import EvolutionaryAlgorithm
 
+from covid_modelling.simulation_adjustment import SimulationAdjustment
+from covid_modelling.evolutionaryalgorithm import EvolutionaryAlgorithm
 from covid_modelling.health_state import HealthState
 from covid_modelling.person import Person
 from covid_modelling.simulation_run import SimulationRun
@@ -18,12 +19,12 @@ total: int
 infected: int
 stateConfig: List[List[Person]]
 previousRuns: List[SimulationRun] = []
-ea: EvolutionaryAlgorithm = EvolutionaryAlgorithm()
+adjustments: SimulationAdjustment = SimulationAdjustment()
+evolution: EvolutionaryAlgorithm = EvolutionaryAlgorithm()
 
 
 def initialize() -> None:
     global timeStep, stateConfig, infected, dead, recovered, total
-
     timeStep = 0
     infected = 0
     dead = 0
@@ -53,7 +54,7 @@ def observe() -> None:
     axis("image")
 
     mortality_rate_percent: float = round((dead/infected)*100, 2)
-    title(f"Days: {timeStep} Times Run: {ea.get_number_of_evolutions()}\n "
+    title(f"Days: {timeStep}\n "
           f"Total Infected: {infected} Dead: {dead} Recovered: {recovered}\n "
           f"Mortality Rate: {mortality_rate_percent}%\n"
           f"Infection Chance: {round(variables.INFECTION_CHANCE,4)} Mortality Chance: {round(variables.MORTALITY_CHANCE, 4)}")
@@ -90,12 +91,22 @@ def update() -> None:
 
             stateConfig[posY][posX] = person
 
+    print(variables.ADJUSTMENTS_COMPLETE)
+    if timeStep == variables.STEP_LIMIT:
+        previousRuns.append(SimulationRun(dead, infected))
+
+
+def adjust() -> None:
+    if not variables.ADJUSTMENTS_COMPLETE:
+        print("ADJUSTING")
+        variables.ADJUSTMENTS_COMPLETE = adjustments.adjust_simulation(previousRuns)
+
 
 def evolve() -> None:
-    global previousRuns
+    if variables.ADJUSTMENTS_COMPLETE:
+        print("EVOLVING")
+        evolution.evolve_mask_usage()
 
-    previousRuns.append(SimulationRun(dead, infected))
-    ea.evolve_simulation(previousRuns)
     return
 
 
@@ -146,6 +157,7 @@ def __handle_healthy_person(person: Person, pos_y: int, pos_x: int) -> None:
 
                 # The neighbour must be in an infectious phase of the disease to infect someone
                 if random() < infection_chance and neighbour.get_infection().get_infectious():
+                    neighbour.increment_infection_spread()
                     person.become_infected()
                     infected += 1
 
@@ -161,4 +173,4 @@ def __create_health_value_array() -> ndarray:
     return health_values
 
 
-pycx.GUI().start(func=[initialize, observe, update, evolve])
+pycx.GUI().start(func=[initialize, observe, update, adjust, evolve])
