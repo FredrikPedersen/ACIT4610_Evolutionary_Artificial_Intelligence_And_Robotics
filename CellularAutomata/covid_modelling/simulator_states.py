@@ -101,7 +101,6 @@ def update() -> None:
         preventive_measures.update()
 
 
-
 def adjust() -> None:
     if not variables.ADJUSTMENTS_COMPLETE:
         print("ADJUSTING")

@@ -1,7 +1,12 @@
 import covid_modelling.variables as variables
+from typing import Dict
 
 
 class SimulationRun:
+
+    # To be set when the evolutionary algorithm runs
+    __fitness_score: float
+    __inconvenience_scores: Dict[str, float]
 
     def __init__(self, total_people: int, deaths: int, infected: int, reproduction_rate: float):
         self.__total_people: int = total_people
@@ -12,7 +17,6 @@ class SimulationRun:
         self.__mortality_chance: float = variables.MORTALITY_CHANCE
         self.__percentage_masks: float = variables.PERCENTAGE_USING_MASKS
         self.__percentage_social_distancing: float = variables.PERCENTAGE_SOCIAL_DISTANCING
-        self.__fitness_score: float = 0
 
     def get_total_people(self) -> int:
         return self.__total_people
@@ -39,7 +43,19 @@ class SimulationRun:
         return self.__percentage_social_distancing
 
     def get_fitness_score(self) -> float:
+        if self.__fitness_score is None:
+            raise Exception("Fitness Score was never set!")
+
         return self.__fitness_score
+
+    def get_inconvenience_scores(self) -> Dict[str, float]:
+        if self.__inconvenience_scores is None:
+            raise Exception("Inconvenience Score was never set!")
+
+        return self.__inconvenience_scores
 
     def set_fitness_score(self, fitness_value: float):
         self.__fitness_score = fitness_value
+
+    def set_inconvenience_score(self, inconvenience_scores: Dict[str, float]):
+        self.__inconvenience_scores = inconvenience_scores
