@@ -10,10 +10,13 @@ SYMPTOMS: str = "Symptoms"
 
 # Simulation constants
 AREA_DIMENSIONS: int = 100  # The simulation has nxn number of cells. AREA_DIMENSIONS = n.
-DAYS_SINCE_OUTBREAK: int = 10  # We consider march 2nd as the pandemic start in Norway. Data was pulled 27.10.2020.
-REPORTED_INFECTIONS: int = 17843
-REPORTED_DEATHS: int = 279
+DAYS_SINCE_OUTBREAK: int = 50  # We consider march 2nd as the pandemic start in Norway. Data was pulled 27.10.2020.
 INIT_INFECTION_PROBABILITY: float = 0.01  # Arbitrary number for setting number of initially infected when the simulation starts.
+
+# 27.10.2020 there have been 74.65 infections and 1.167 deaths on avergage per day. Doing it like this so I can run the simulation on shorter intervalls without it going completly bonkers.
+REPORTED_INFECTIONS: int = int(74.65 * DAYS_SINCE_OUTBREAK)
+REPORTED_DEATHS: int = int(1.167 * DAYS_SINCE_OUTBREAK)
+
 MASK_MEASURE: str = "Wearing Mask"
 SOCIAL_DISTANCE_MEASURE: str = "Social Distancing"
 ISOLATION_MEASURE: str = "Isolation"
