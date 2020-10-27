@@ -60,7 +60,7 @@ import covid_modelling.variables as variables
 class GUI:
 
     # Constructor
-    def __init__(self, title='PyCX Simulator', interval=0, stepSize=1, parameterSetters=[]):
+    def __init__(self, title='Covid-19 Simulator', interval=0, stepSize=1, parameterSetters=[]):
 
         ## all GUI variables moved to inside constructor by Hiroki Sayama 10/09/2018
 
@@ -130,6 +130,12 @@ class GUI:
         self.buttonReset = Button(self.frameRun, width=30, height=2, text='Reset', command=self.resetModel)
         self.buttonReset.pack(side=TOP, padx=5, pady=5)
         self.showHelp(self.buttonReset, "Resets the simulation")
+
+        # buttonAdjustments
+        self.adjustmentsEnabled = not variables.ADJUSTMENTS_COMPLETE
+        self.buttonAdjustments = Button(self.frameRun, width=30, height=2, text='Disable Adjustments', command=self.disableAdjustments)
+        self.buttonAdjustments.pack(side=TOP, padx=5, pady=5)
+        self.showHelp(self.buttonAdjustments, "Disables simulation adjustments")
 
         # -----------------------------------
         # frameSettings
@@ -237,6 +243,10 @@ class GUI:
             self.runPauseString.set("Pause")
             self.buttonStep.configure(state=DISABLED)
             self.buttonReset.configure(state=DISABLED)
+
+            if self.adjustmentsEnabled:
+                self.buttonAdjustments.configure(state=DISABLED)
+
             if len(self.parameterSetters) > 0:
                 self.buttonSaveParameters.configure(state=NORMAL)
                 self.buttonSaveParametersAndReset.configure(state=DISABLED)
@@ -244,13 +254,18 @@ class GUI:
             self.runPauseString.set("Continue Run")
             self.buttonStep.configure(state=NORMAL)
             self.buttonReset.configure(state=NORMAL)
+
+            if self.adjustmentsEnabled:
+                self.buttonAdjustments.configure(state=NORMAL)
+
             if len(self.parameterSetters) > 0:
                 self.buttonSaveParameters.configure(state=NORMAL)
                 self.buttonSaveParametersAndReset.configure(state=NORMAL)
 
     def stepModel(self):
         if self.currentStep >= variables.STEP_LIMIT:
-            self.evolveModel()
+            self.adjustModel()
+            self.modelEvolve()
             return
 
         if self.running:
@@ -264,7 +279,8 @@ class GUI:
 
     def stepOnce(self):
         if self.currentStep >= variables.STEP_LIMIT:
-            self.evolveModel()
+            self.adjustModel()
+            self.modelEvolve()
             return
 
         self.running = False
@@ -281,13 +297,22 @@ class GUI:
         self.runPauseString.set("Run")
         self.modelInitFunc()
         self.currentStep = 0
+        self.adjustmentsEnabled = True
+        self.buttonAdjustments.configure(state=NORMAL)
+        variables.ADJUSTMENTS_COMPLETE = False
         self.setStatusStr(message)
         self.drawModel()
 
-    def evolveModel(self):
-        self.modelEvolve()
-        self.resetModel("Simulation Reached Current Date... evolving")
+    def adjustModel(self):
+        self.modelAdjust()
+        self.resetModel("Simulation Reached Current Date... adjusting")
         self.runEvent()
+
+    def disableAdjustments(self):
+        self.adjustmentsEnabled = False
+        self.buttonAdjustments.configure(state=DISABLED)
+        if not variables.ADJUSTMENTS_COMPLETE:
+            variables.ADJUSTMENTS_COMPLETE = True
 
     def drawModel(self):
         plt.ion()  # SM 3/26/2020
@@ -300,11 +325,12 @@ class GUI:
         plt.show()  # bug fix by Hiroki Sayama in 2016 #SM 3/26/2020
 
     def start(self, func=[]):
-        if len(func) == 4:
+        if len(func) == 5:
             self.modelInitFunc = func[0]
             self.modelDrawFunc = func[1]
             self.modelStepFunc = func[2]
-            self.modelEvolve = func[3]
+            self.modelAdjust = func[3]
+            self.modelEvolve = func[4]
 
             if (self.modelStepFunc.__doc__ != None and len(self.modelStepFunc.__doc__) > 0):
                 self.showHelp(self.buttonStep, self.modelStepFunc.__doc__.strip())
