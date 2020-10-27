@@ -9,8 +9,7 @@ class Person:
 
     def __init__(self, state: HealthState):
         self.__state: HealthState = state
-
-        self.__social_distancing: bool = bool(random.getrandbits(1))
+        self.__infection_spread: int = 0
         self.__age = int(random.random() * 100)
         self.__infection: Infection = Infection()
         self.__in_isolation: bool = False
@@ -21,13 +20,16 @@ class Person:
         else:
             self.__wearing_mask = False
 
-        #  Random check to see if the person belongs in a risk group
+        if random.random() < variables.PERCENTAGE_SOCIAL_DISTANCING:
+            self.__social_distancing = True
+        else:
+            self.__social_distancing = False
+
         if random.random() < constants.MORTAL_RISK_GROUP_PERCENTAGE:
             self.__risk_group = True
         else:
             self.__risk_group = False
 
-        #  Determine whether the virus would be lethal to this person
         if self.__risk_group or self.__age > constants.MORTAL_RISK_AGE:
             if random.random() < variables.MORTALITY_CHANCE:
                 self.__infection.set_lethal(True)
@@ -42,6 +44,9 @@ class Person:
     def become_dead(self):
         self.__state = HealthState.Dead
         self.__infection.update(False)
+
+    def increment_infection_spread(self) -> None:
+        self.__infection_spread += 1
         
     def get_state(self) -> HealthState:
         return self.__state
