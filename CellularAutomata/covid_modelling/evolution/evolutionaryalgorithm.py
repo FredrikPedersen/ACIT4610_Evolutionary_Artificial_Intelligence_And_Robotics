@@ -1,6 +1,6 @@
 import covid_modelling.variables as variables
 
-counter: int = 1
+counter: int = 2
 benchmark_run: bool = True
 
 
@@ -26,7 +26,7 @@ def evolve() -> bool:
     return True if variables.PERCENTAGE_USING_MASKS == 1.0 and variables.PERCENTAGE_SOCIAL_DISTANCING == 1.0 else False
 
     #PLAN! Print finished run data to a graph, displaying the fitness score of each run.
-    #Create two graphs: one for isolation enabled, and for disabled. Have the fitness score as Y-value and
+    #Create two results: one for isolation enabled, and for disabled. Have the fitness score as Y-value and
     # Percentage of social distancers and mask wearers as the X-value.
 
 

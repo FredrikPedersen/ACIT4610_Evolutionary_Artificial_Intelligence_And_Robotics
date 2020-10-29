@@ -5,14 +5,13 @@ from pylab import *
 import covid_modelling.constants as constants
 import covid_modelling.variables as variables
 import pycx.pycxsimulator as pycx
-
-from covid_modelling.evolution.simulation_adjustment import SimulationAdjustment
 from covid_modelling.evolution.evolutionaryalgorithm import evolve as evolveSimulation
+from covid_modelling.evolution.fitness_utility import FitnessUtility
 from covid_modelling.evolution.preventive_measures import PreventiveMeasures
+from covid_modelling.evolution.simulation_adjustment import SimulationAdjustment
+from covid_modelling.results.simulation_run import SimulationRun
 from covid_modelling.simulation_classes.health_state import HealthState
 from covid_modelling.simulation_classes.person import Person
-from covid_modelling.evolution.simulation_run import SimulationRun
-from covid_modelling.evolution.fitness_utility import FitnessUtility
 
 timeStep: int
 totalDead: int
@@ -20,21 +19,23 @@ totalRecovered: int
 totalInfected: int
 stateConfig: List[List[Person]]
 allPeople: List[Person]
+currentRun: SimulationRun
 previousRuns: List[SimulationRun] = []
 adjustments: SimulationAdjustment = SimulationAdjustment()
 fitnessUtility: FitnessUtility = FitnessUtility()
 
 
 def initialize() -> None:
-    global timeStep, stateConfig, totalInfected, totalDead, totalRecovered, allPeople
+    global timeStep, stateConfig, totalInfected, totalDead, totalRecovered, allPeople, currentRun
     timeStep = 0
     totalInfected = 0
     totalDead = 0
     totalRecovered = 0
+    allPeople = []
+    currentRun = SimulationRun(len(allPeople), totalDead, totalInfected)
 
     # numpy arrays does not support objects, using a standard 2D-array instead
     stateConfig = [[Person for i in range(constants.AREA_DIMENSIONS)] for j in range(constants.AREA_DIMENSIONS)]
-    allPeople = []
 
     for posX in range(constants.AREA_DIMENSIONS):
         for posY in range(constants.AREA_DIMENSIONS):
@@ -66,7 +67,7 @@ def observe() -> None:
 
 
 def update() -> None:
-    global timeStep, stateConfig
+    global timeStep, stateConfig, currentRun
     timeStep += 1
 
     for posX in range(constants.AREA_DIMENSIONS):
@@ -95,9 +96,10 @@ def update() -> None:
 
             stateConfig[posY][posX] = person
 
+    __update_current_run()
+
     if timeStep == variables.STEP_LIMIT:
-        current_run = fitnessUtility.calculate_and_update_fitness(SimulationRun(len(allPeople), totalDead, totalInfected))
-        previousRuns.append(current_run)
+        previousRuns.append(currentRun)
         preventive_measures: PreventiveMeasures = PreventiveMeasures.get_instance()
         preventive_measures.update()
 
@@ -112,6 +114,9 @@ def evolve() -> None:
     if not variables.ADJUSTMENTS_ENABLED:
         print("EVOLVING")
         variables.EVOLUTION_COMPLETE = evolveSimulation()
+
+        if len(previousRuns) > 1:
+            variables.EVOLUTION_COMPLETE = True
 
     return
 
@@ -179,4 +184,13 @@ def __create_health_value_array() -> ndarray:
     return health_values
 
 
-pycx.GUI().start(func=[initialize, observe, update, adjust, evolve])
+def __update_current_run() -> None:
+    global currentRun
+
+    currentRun.set_total_people(len(allPeople))
+    currentRun.set_infected(totalInfected)
+    currentRun.set_deaths(totalDead)
+    currentRun = fitnessUtility.calculate_and_update_fitness(currentRun, timeStep)
+
+
+pycx.GUI().start(previousRuns, func=[initialize, observe, update, adjust, evolve])

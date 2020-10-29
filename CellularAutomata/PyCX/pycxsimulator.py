@@ -4,6 +4,7 @@ import platform
 import sys
 import warnings
 import covid_modelling.variables as variables
+from covid_modelling.results.graph import draw_result_graphs as DrawGraph
 
 if platform.system() == 'Windows':
     backend = 'TkAgg'
@@ -99,6 +100,11 @@ class GUI:
         self.buttonAdjustments = Button(self.frameRun, width=30, height=2, textvariable=self.toggleAdjustmentsString, command=self.toggleAdjustments)
         self.buttonAdjustments.pack(side=TOP, padx=5, pady=5)
         self.showHelp(self.buttonAdjustments, "Toggles simulation adjustments")
+
+        # buttonQuit
+        self.buttonQuit = Button(self.frameRun, width=30, height=2, text="Quit", command=self.quitGUI)
+        self.buttonQuit.pack(side=TOP, padx=5, pady=5)
+        self.showHelp(self.buttonQuit, "Exits the simulation")
 
         # -----------------------------------
         # frameSettings
@@ -222,6 +228,10 @@ class GUI:
                 self.buttonSaveParametersAndReset.configure(state=NORMAL)
 
     def stepModel(self):
+        if variables.EVOLUTION_COMPLETE:
+            self.closeSimulation()
+            self.drawGraphs()
+
         if self.currentStep >= variables.STEP_LIMIT:
             self.adjustModel()
             self.modelEvolve()
@@ -237,6 +247,10 @@ class GUI:
             self.rootWindow.after(int(self.timeInterval * 1.0 / self.stepSize), self.stepModel)
 
     def stepOnce(self):
+        if variables.EVOLUTION_COMPLETE:
+            self.closeSimulation()
+            self.drawGraphs()
+
         if self.currentStep >= variables.STEP_LIMIT:
             self.adjustModel()
             self.modelEvolve()
@@ -280,22 +294,24 @@ class GUI:
         variables.ADJUSTMENTS_ENABLED = self.adjustmentsEnabled
 
     def drawModel(self):
-        pyplot.ion()  # SM 3/26/2020
+        pyplot.ion()
 
         if self.modelFigure == None or self.modelFigure.canvas.manager.window == None:
-            self.modelFigure = pyplot.figure()  # SM 3/26/2020
+            self.modelFigure = pyplot.figure("Covid-19 Simulator")
 
         self.modelDrawFunc()
         self.modelFigure.canvas.manager.window.update()
-        pyplot.show()  # bug fix by Hiroki Sayama in 2016 #SM 3/26/2020
+        pyplot.show()
 
-    def start(self, func=[]):
+    def start(self, graph_data, func=[]):
         if len(func) == 5:
             self.modelInitFunc = func[0]
             self.modelDrawFunc = func[1]
             self.modelStepFunc = func[2]
             self.modelAdjust = func[3]
             self.modelEvolve = func[4]
+
+            self.graphData = graph_data
 
             if (self.modelStepFunc.__doc__ != None and len(self.modelStepFunc.__doc__) > 0):
                 self.showHelp(self.buttonStep, self.modelStepFunc.__doc__.strip())
@@ -311,9 +327,9 @@ class GUI:
         self.rootWindow.mainloop()
 
     def quitGUI(self):
-        self.running = False  # HS 06/29/2020
+        self.running = False
         self.rootWindow.quit()
-        pyplot.close('all')  # HS 06/29/2020
+        pyplot.close('all')
         self.rootWindow.destroy()
 
     def showHelp(self, widget, text):
@@ -327,3 +343,12 @@ class GUI:
 
         widget.bind("<Enter>", lambda e: setText(self))
         widget.bind("<Leave>", lambda e: showHelpLeave(self))
+
+    def closeSimulation(self):
+        self.running = False
+        pyplot.close("Covid-19 Simulator")
+        self.buttonRun.configure(state=DISABLED)
+
+    def drawGraphs(self):
+        DrawGraph(self.graphData)
+

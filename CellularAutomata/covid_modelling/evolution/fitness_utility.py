@@ -1,4 +1,5 @@
-from covid_modelling.evolution.simulation_run import SimulationRun
+from typing import Dict
+from covid_modelling.results.simulation_run import SimulationRun
 from covid_modelling.evolution.preventive_measures import PreventiveMeasures
 from covid_modelling.evolution.group import Group
 
@@ -7,19 +8,22 @@ class FitnessUtility:
 
     __preventive_measures = PreventiveMeasures.get_instance()
 
-    def calculate_and_update_fitness(self, simulation_run: SimulationRun) -> SimulationRun:
+    def calculate_and_update_fitness(self, simulation_run: SimulationRun, time_step: int) -> SimulationRun:
         all_measures = self.__preventive_measures.get_preventive_measures()
         inconvenience_score = 0
         measure_scores = {}
+        run_scores: Dict[int, float] = simulation_run.get_fitness_score()
 
         for measure in all_measures:
             measure_inconvenience_score = self.__calculate_inconvenience(measure, simulation_run)
             measure_scores[measure.get_name()] = measure_inconvenience_score
             inconvenience_score += measure_inconvenience_score
 
-        fitness_score = inconvenience_score + (simulation_run.get_infected() * 2) + (simulation_run.get_deaths() * 3)
+        fitness_score = round(inconvenience_score + (simulation_run.get_infected() * 2) + (simulation_run.get_deaths() * 3), 2)
+        run_scores[time_step] = fitness_score
+
         simulation_run.set_inconvenience_score(measure_scores)
-        simulation_run.set_fitness_score(fitness_score)
+        simulation_run.set_fitness_score(run_scores)
 
         return simulation_run
 
