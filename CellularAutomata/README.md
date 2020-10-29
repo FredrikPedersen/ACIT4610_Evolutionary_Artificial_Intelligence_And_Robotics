@@ -199,5 +199,6 @@ Both dead and recovered patients are thus considered inactive cells, and are rep
 [Risk Groups](https://forskning.no/sykdommer-virus/hvem-er-egentlig-i-risikogruppen-for-korona/1659901) 
 [Virus Progression](https://www.cdc.gov/coronavirus/2019-ncov/hcp/clinical-guidance-management-patients.html)   
 [Corona Stats Norway](https://www.fhi.no/en/id/infectious-diseases/coronavirus/daily-reports/daily-reports-COVID19/)  
+[Percent Using Face Masks](https://www.aftenposten.no/norge/i/9vjaXw/folkehelseinstituttet-har-talt-hvor-mange-som-bruker-munnbind-i-kollek)
   
  
