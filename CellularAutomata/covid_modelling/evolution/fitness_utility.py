@@ -1,6 +1,6 @@
-from covid_modelling.simulation_run import SimulationRun
-from covid_modelling.preventive_measures import PreventiveMeasures
-from covid_modelling.group import Group
+from covid_modelling.evolution.simulation_run import SimulationRun
+from covid_modelling.evolution.preventive_measures import PreventiveMeasures
+from covid_modelling.evolution.group import Group
 
 
 class FitnessUtility:
@@ -17,7 +17,7 @@ class FitnessUtility:
             measure_scores[measure.get_name()] = measure_inconvenience_score
             inconvenience_score += measure_inconvenience_score
 
-        fitness_score = inconvenience_score + (simulation_run.get_reproduction_rate() * 100) + (simulation_run.get_infected() * 2) + (simulation_run.get_deaths() * 3)
+        fitness_score = inconvenience_score + (simulation_run.get_infected() * 2) + (simulation_run.get_deaths() * 3)
         simulation_run.set_inconvenience_score(measure_scores)
         simulation_run.set_fitness_score(fitness_score)
 

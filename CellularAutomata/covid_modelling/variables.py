@@ -2,6 +2,7 @@ from covid_modelling.constants import DAYS_SINCE_OUTBREAK
 
 STEP_LIMIT: int = DAYS_SINCE_OUTBREAK  # Limit number of steps the simulation takes before evolving.
 ADJUSTMENTS_ENABLED: bool = False
+EVOLUTION_COMPLETE: bool = False
 
 # These numbers have been calculating using the simulation_adjustments algorithm, and are set to give a result as close
 # as possible to the real-world number of infected and dead people when MANDATORY_ISOLATION is enabled,

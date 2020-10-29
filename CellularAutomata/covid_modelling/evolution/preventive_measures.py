@@ -1,6 +1,6 @@
 import covid_modelling.constants as constants
 import covid_modelling.variables as variables
-from covid_modelling.group import Group
+from covid_modelling.evolution.group import Group
 
 
 class PreventiveMeasures:

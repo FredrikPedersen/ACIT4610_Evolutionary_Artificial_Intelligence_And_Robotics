@@ -1,7 +1,7 @@
 from typing import List
 import covid_modelling.constants as constants
 import covid_modelling.variables as variables
-from covid_modelling.simulation_run import SimulationRun
+from covid_modelling.evolution.simulation_run import SimulationRun
 
 
 class SimulationAdjustment:

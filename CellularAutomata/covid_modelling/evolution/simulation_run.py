@@ -8,11 +8,10 @@ class SimulationRun:
     __fitness_score: float
     __inconvenience_scores: Dict[str, float]
 
-    def __init__(self, total_people: int, deaths: int, infected: int, reproduction_rate: float):
+    def __init__(self, total_people: int, deaths: int, infected: int):
         self.__total_people: int = total_people
         self.__deaths: int = deaths
         self.__infected: int = infected
-        self.__reproduction_rate: float = reproduction_rate
 
         self.__infection_chance: float = variables.INFECTION_CHANCE
         self.__mortality_chance: float = variables.MORTALITY_CHANCE
@@ -28,9 +27,6 @@ class SimulationRun:
 
     def get_infected(self) -> int:
         return self.__infected
-
-    def get_reproduction_rate(self) -> float:
-        return self.__reproduction_rate
 
     def get_infection_chance(self) -> float:
         return self.__infection_chance

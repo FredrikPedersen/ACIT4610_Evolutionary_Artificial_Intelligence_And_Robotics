@@ -1,5 +1,5 @@
-from covid_modelling.health_state import HealthState
-from covid_modelling.infection import Infection
+from covid_modelling.simulation_classes.health_state import HealthState
+from covid_modelling.simulation_classes.infection import Infection
 import covid_modelling.constants as constants
 import covid_modelling.variables as variables
 import random
