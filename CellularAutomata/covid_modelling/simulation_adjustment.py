@@ -5,10 +5,12 @@ from covid_modelling.simulation_run import SimulationRun
 
 
 class SimulationAdjustment:
+    # Simulation adjustments is an evolutionary algorithm meant to adjust the INFECTION_CHANCE and MORTALITY_CHANCE
+    # variables to yield a result as close as possible to real-world numbers of infected and dead.
+
     __ADEQUATE_INFECTIONS_DIFFERENCE: int = int(constants.REPORTED_INFECTIONS / 10)
     __ADEQUATE_DEATHS_DIFFERENCE: int = int(constants.REPORTED_DEATHS / 10)
 
-    __number_of_adjustments: int = 0
     __highest_infection_chance: float = 0.5
     __lowest_infection_chance: float = 0.1
 
@@ -17,11 +19,10 @@ class SimulationAdjustment:
 
     def adjust_simulation(self, simulation_runs: List[SimulationRun]):
 
-        self.__number_of_adjustments += 1
         previous_simulation: SimulationRun = simulation_runs[len(simulation_runs) - 1]
 
         if self.__adjust_infection_chance(previous_simulation) and self.__adjust_mortality_chance(previous_simulation):
-            variables.ADJUSTMENTS_COMPLETE = True
+            variables.ADJUSTMENTS_ENABLED = False
 
     # evolve_simulation
 
@@ -89,6 +90,3 @@ class SimulationAdjustment:
         return True
 
     # __evolve_mortality_chance
-
-    def get_number_of_adjustments(self) -> int:
-        return self.__number_of_adjustments

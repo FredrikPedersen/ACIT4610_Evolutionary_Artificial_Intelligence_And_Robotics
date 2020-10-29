@@ -89,7 +89,7 @@ class GUI:
         self.showHelp(self.buttonReset, "Resets the simulation")
 
         # buttonAdjustments
-        self.adjustmentsEnabled = not variables.ADJUSTMENTS_COMPLETE
+        self.adjustmentsEnabled = variables.ADJUSTMENTS_ENABLED
 
         self.toggleAdjustmentsString = StringVar(self.rootWindow)
         self.toggleAdjustmentsString.set("Disable Adjustments")
@@ -259,7 +259,7 @@ class GUI:
         self.adjustmentsEnabled = True
 
         if manualReset:
-            variables.ADJUSTMENTS_COMPLETE = False
+            variables.ADJUSTMENTS_ENABLED = False
 
         self.setStatusStr(message)
         self.drawModel()
@@ -277,7 +277,7 @@ class GUI:
         else:
             self.toggleAdjustmentsString.set("Disable Adjustments")
 
-        variables.ADJUSTMENTS_COMPLETE = not self.adjustmentsEnabled
+        variables.ADJUSTMENTS_ENABLED = self.adjustmentsEnabled
 
     def drawModel(self):
         pyplot.ion()  # SM 3/26/2020

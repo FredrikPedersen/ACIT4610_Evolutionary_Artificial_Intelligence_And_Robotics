@@ -104,13 +104,13 @@ def update() -> None:
 
 
 def adjust() -> None:
-    if not variables.ADJUSTMENTS_COMPLETE:
+    if variables.ADJUSTMENTS_ENABLED:
         print("ADJUSTING")
         adjustments.adjust_simulation(previousRuns)
 
 
 def evolve() -> None:
-    if variables.ADJUSTMENTS_COMPLETE:
+    if not variables.ADJUSTMENTS_ENABLED:
         print("EVOLVING")
         evolveSimulation(previousRuns)
 
