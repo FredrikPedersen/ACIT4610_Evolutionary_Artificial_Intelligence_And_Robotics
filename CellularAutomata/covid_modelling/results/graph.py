@@ -7,11 +7,9 @@ from covid_modelling.results.simulation_run import SimulationRun
 
 
 def draw_result_graphs(simulation_runs: List[SimulationRun]):
-    figure_without_isolation = "Without Isolation"
-    figure_with_isolation = "With Isolation"
-
-    x = [1,2,3]
-    y = [4,5,6]
+    figure_without_isolation: str = "Without Isolation"
+    figure_with_isolation: str = "With Isolation"
+    counter: int = 0
 
     #simulation_runs.sort(key=lambda x: x.get_mandatory_isolation())
 
@@ -25,14 +23,23 @@ def draw_result_graphs(simulation_runs: List[SimulationRun]):
         else:
             without_isolation.append(simulation_run)
 
-    pyplot.figure(figure_without_isolation)
-    pyplot.plot(y, x, label="Test")
-    pyplot.legend()
+    for simulation_run in with_isolation:
+        counter += 1
+        __plot_run_fitness_timestep(simulation_run, figure_with_isolation, counter)
 
-    pyplot.figure(figure_with_isolation)
-    pyplot.plot(y, x, label="Test")
-    pyplot.legend()
+    counter = 0
 
+    for simulation_run in without_isolation:
+        counter += 1
+        __plot_run_fitness_timestep(simulation_run, figure_without_isolation, counter)
+
+
+def __plot_run_fitness_timestep(simulation_run: SimulationRun, figure, counter):
+    run_x = list(simulation_run.get_fitness_score().keys())
+    run_y = list(simulation_run.get_fitness_score().values())
+    pyplot.figure(figure)
+    pyplot.plot(run_x, run_y, label=f"#{counter}")
+    pyplot.legend()
 
 def __plot_benchmark_fitness_timestep(simulation_runs: List[SimulationRun], figures: List[str]) -> None:
     benchmark_run: SimulationRun = simulation_runs[0]
@@ -43,8 +50,8 @@ def __plot_benchmark_fitness_timestep(simulation_runs: List[SimulationRun], figu
 
     for figure_name in figures:
         pyplot.figure(figure_name)
-        pyplot.plot(benchmark_x, benchmark_y, "r-", label="benchmark")
+        pyplot.plot(benchmark_x, benchmark_y, color="red", linewidth=3, label="benchmark")
         pyplot.legend()
         pyplot.xlabel("Timestep")
         pyplot.ylabel("Fitness Score")
-        pyplot.title("Simulation Results")
+        pyplot.title(figure_name)

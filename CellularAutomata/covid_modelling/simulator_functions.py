@@ -115,7 +115,7 @@ def evolve() -> None:
         print("EVOLVING")
         variables.EVOLUTION_COMPLETE = evolveSimulation()
 
-        if len(previousRuns) > 1:
+        if len(previousRuns) > 10:
             variables.EVOLUTION_COMPLETE = True
 
     return
