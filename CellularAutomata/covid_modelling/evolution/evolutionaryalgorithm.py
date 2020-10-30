@@ -1,6 +1,6 @@
 import covid_modelling.variables as variables
 
-counter: int = 2
+counter: int = 0
 benchmark_run: bool = True
 
 
@@ -11,33 +11,20 @@ def evolve() -> bool:
         __benchmark_run_complete()
         return False
 
-    if counter % 2 == 0:
-        __adjust_social_distancing()
+    __toggle_isolation()
 
-    if counter % 3 == 0:
-        __adjust_mask_usage()
-        counter += 1
+    if counter != 0 and counter % 2 == 0:
+        variables.PERCENTAGE_SOCIAL_DISTANCING = round((variables.PERCENTAGE_SOCIAL_DISTANCING + 0.1), 2)
 
-    if counter % 5 == 0:
-        __toggle_isolation()
-        counter = 1
+    if counter != 0 and counter % 4 == 0:
+        variables.PERCENTAGE_USING_MASKS = round((variables.PERCENTAGE_USING_MASKS + 0.1), 2)
+        variables.PERCENTAGE_SOCIAL_DISTANCING = round((variables.PERCENTAGE_SOCIAL_DISTANCING - 0.2), 2)
+
+    if counter >= 6:
+        counter = 0
 
     counter += 1
-    return True if variables.PERCENTAGE_USING_MASKS == 1.0 and variables.PERCENTAGE_SOCIAL_DISTANCING == 1.0 else False
-
-    #PLAN! Print finished run data to a graph, displaying the fitness score of each run.
-    #Create two results: one for isolation enabled, and for disabled. Have the fitness score as Y-value and
-    # Percentage of social distancers and mask wearers as the X-value.
-
-
-def __adjust_mask_usage():
-    if variables.PERCENTAGE_USING_MASKS < 1.0:
-        variables.PERCENTAGE_USING_MASKS = round((variables.PERCENTAGE_USING_MASKS + 0.1), 2)
-
-
-def __adjust_social_distancing():
-    if variables.PERCENTAGE_SOCIAL_DISTANCING < 1.0:
-        variables.PERCENTAGE_SOCIAL_DISTANCING = round((variables.PERCENTAGE_SOCIAL_DISTANCING + 0.1), 2)
+    return True if variables.PERCENTAGE_USING_MASKS == 1.0 and variables.PERCENTAGE_SOCIAL_DISTANCING == 1.0 and not variables.MANDATORY_ISOLATION else False
 
 
 def __benchmark_run_complete():
