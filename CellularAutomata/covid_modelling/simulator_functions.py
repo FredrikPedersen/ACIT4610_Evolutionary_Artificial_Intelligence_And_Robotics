@@ -106,19 +106,12 @@ def update() -> None:
 
 def adjust() -> None:
     if variables.ADJUSTMENTS_ENABLED:
-        print("ADJUSTING")
         adjustments.adjust_simulation(previousRuns)
 
 
 def evolve() -> None:
     if not variables.ADJUSTMENTS_ENABLED:
-        print("EVOLVING")
         variables.EVOLUTION_COMPLETE = evolveSimulation()
-
-        if len(previousRuns) > 10:
-            variables.EVOLUTION_COMPLETE = True
-
-    return
 
 
 def __handle_infected_person(person: Person) -> None:
