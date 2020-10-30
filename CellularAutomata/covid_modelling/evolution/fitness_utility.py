@@ -10,8 +10,8 @@ class FitnessUtility:
 
     def calculate_and_update_fitness(self, simulation_run: SimulationRun, time_step: int) -> SimulationRun:
         all_measures = self.__preventive_measures.get_preventive_measures()
-        inconvenience_score = 0
-        measure_scores = {}
+        inconvenience_score: int = 0
+        measure_scores: Dict[str, float] = {}
         run_scores: Dict[int, float] = simulation_run.get_fitness_score()
 
         for measure in all_measures:
@@ -19,7 +19,7 @@ class FitnessUtility:
             measure_scores[measure.get_name()] = measure_inconvenience_score
             inconvenience_score += measure_inconvenience_score
 
-        fitness_score = round(inconvenience_score + (simulation_run.get_infected() * 3) + (simulation_run.get_deaths() * 2), 2)
+        fitness_score = round(inconvenience_score/4 + (simulation_run.get_infected() * 5) + (simulation_run.get_deaths() * 10), 2)
         run_scores[time_step] = fitness_score
 
         simulation_run.set_inconvenience_score(measure_scores)
