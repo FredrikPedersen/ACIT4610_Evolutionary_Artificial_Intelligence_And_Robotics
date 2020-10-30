@@ -4,7 +4,7 @@ import platform
 import sys
 import warnings
 import covid_modelling.variables as variables
-from covid_modelling.results.graph import draw_result_graphs as DrawGraph
+import covid_modelling.results.graph as graphs
 
 if platform.system() == 'Windows':
     backend = 'TkAgg'
@@ -78,11 +78,6 @@ class GUI:
                                 command=self.runEvent)
         self.buttonRun.pack(side=TOP, padx=5, pady=5)
         self.showHelp(self.buttonRun, "Runs the simulation (or pauses the running simulation)")
-
-        # buttonStep
-        self.buttonStep = Button(self.frameRun, width=30, height=2, text='Step Once', command=self.stepOnce)
-        self.buttonStep.pack(side=TOP, padx=5, pady=5)
-        self.showHelp(self.buttonStep, "Steps the simulation only once")
 
         # buttonReset
         self.buttonReset = Button(self.frameRun, width=30, height=2, text='Reset', command=self.resetModel)
@@ -210,7 +205,6 @@ class GUI:
         if self.running:
             self.rootWindow.after(self.timeInterval, self.stepModel)
             self.runPauseString.set("Pause")
-            self.buttonStep.configure(state=DISABLED)
             self.buttonReset.configure(state=DISABLED)
             self.buttonAdjustments.configure(state=DISABLED)
 
@@ -219,7 +213,6 @@ class GUI:
                 self.buttonSaveParametersAndReset.configure(state=DISABLED)
         else:
             self.runPauseString.set("Continue Run")
-            self.buttonStep.configure(state=NORMAL)
             self.buttonReset.configure(state=NORMAL)
             self.buttonAdjustments.configure(state=NORMAL)
 
@@ -245,25 +238,6 @@ class GUI:
             if (self.currentStep) % self.stepSize == 0:
                 self.drawModel()
             self.rootWindow.after(int(self.timeInterval * 1.0 / self.stepSize), self.stepModel)
-
-    def stepOnce(self):
-        if variables.EVOLUTION_COMPLETE:
-            self.closeSimulation()
-            self.drawGraphs()
-
-        if self.currentStep >= variables.STEP_LIMIT:
-            self.adjustModel()
-            self.modelEvolve()
-            return
-
-        self.running = False
-        self.runPauseString.set("Continue Run")
-        self.modelStepFunc()
-        self.currentStep += 1
-        self.setStatusStr("Step " + str(self.currentStep))
-        self.drawModel()
-        if len(self.parameterSetters) > 0:
-            self.buttonSaveParameters.configure(state=NORMAL)
 
     def resetModel(self, message="Model has been reset", manualReset = True):
         self.running = False
@@ -313,9 +287,6 @@ class GUI:
 
             self.graphData = graph_data
 
-            if (self.modelStepFunc.__doc__ != None and len(self.modelStepFunc.__doc__) > 0):
-                self.showHelp(self.buttonStep, self.modelStepFunc.__doc__.strip())
-
             if (self.modelInitFunc.__doc__ != None and len(self.modelInitFunc.__doc__) > 0):
                 self.textInformation.config(state=NORMAL)
                 self.textInformation.delete(1.0, END)
@@ -350,5 +321,5 @@ class GUI:
         self.buttonRun.configure(state=DISABLED)
 
     def drawGraphs(self):
-        DrawGraph(self.graphData)
+        graphs.draw_graphs(self.graphData)
 
