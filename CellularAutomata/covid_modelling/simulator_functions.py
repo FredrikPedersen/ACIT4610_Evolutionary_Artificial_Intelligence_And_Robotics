@@ -161,7 +161,6 @@ def __handle_healthy_person(person: Person, pos_y: int, pos_x: int) -> None:
 
                 # The neighbour must be in an infectious phase of the disease to infect someone
                 if random() < infection_chance and neighbour.get_infection().get_infectious():
-                    neighbour.increment_infection_spread()
                     person.become_infected()
                     totalInfected += 1
 
