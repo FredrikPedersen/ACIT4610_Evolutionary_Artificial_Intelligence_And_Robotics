@@ -26,8 +26,6 @@ class GUI:
 
     def __init__(self, title='Covid-19 Simulator', interval=0, stepSize=1, parameterSetters=[]):
 
-        # all GUI variables moved to inside constructor by Hiroki Sayama 10/09/2018
-
         self.titleText = title
         self.timeInterval = interval
         self.stepSize = stepSize
@@ -67,8 +65,7 @@ class GUI:
         # buttonRun
         self.runPauseString = StringVar(self.rootWindow)
         self.runPauseString.set("Run")
-        self.buttonRun = Button(self.frameRun, width=30, height=2, textvariable=self.runPauseString,
-                                command=self.runEvent)
+        self.buttonRun = Button(self.frameRun, width=30, height=2, textvariable=self.runPauseString,command=self.runEvent)
         self.buttonRun.pack(side=TOP, padx=5, pady=5)
         self.showHelp(self.buttonRun, "Runs the simulation (or pauses the running simulation)")
 
@@ -172,7 +169,7 @@ class GUI:
     def drawModel(self):
         pyplot.ion()
 
-        if self.modelFigure == None or self.modelFigure.canvas.manager.window == None:
+        if self.modelFigure is None or self.modelFigure.canvas.manager.window is None:
             self.modelFigure = pyplot.figure("Covid-19 Simulator")
 
         self.modelDrawFunc()
