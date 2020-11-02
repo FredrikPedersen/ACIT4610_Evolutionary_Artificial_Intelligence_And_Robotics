@@ -5,7 +5,7 @@ from pylab import *
 import covid_modelling.constants as constants
 import covid_modelling.variables as variables
 import pycx.pycxsimulator as pycx
-from covid_modelling.evolution.evolutionaryalgorithm import evolve as evolveSimulation
+from covid_modelling.evolution.scenario_algorithm import evolve as evolveSimulation
 from covid_modelling.evolution.fitness_utility import FitnessUtility
 from covid_modelling.evolution.preventive_measures import PreventiveMeasures
 from covid_modelling.evolution.simulation_adjustment import SimulationAdjustment

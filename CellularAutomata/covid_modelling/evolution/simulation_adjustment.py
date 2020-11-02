@@ -36,13 +36,9 @@ class SimulationAdjustment:
 
     def __adjust_infection_chance(self, previous_simulation: SimulationRun) -> bool:
 
-        # By checking whether the infected and death rates are higher or lower than the benchmark values, increase
-        # or decrease INFECTION_CHANCE and/or MORTALITY_CHANCE accordingly.
-
         previous_simulation_infected: int = previous_simulation.get_infected()
         infection_fitness = self.__calculate_benchmark_fitness(previous_simulation_infected, constants.REPORTED_INFECTIONS, False)
 
-        # In case of some stray simulations, don't change the infection rate if there have been multiple stable runs
         if infection_fitness < -self.__ADEQUATE_INFECTIONS_DIFFERENCE:
 
             if variables.INFECTION_CHANCE > self.__lowest_mortality_chance:
@@ -65,9 +61,6 @@ class SimulationAdjustment:
 
     def __adjust_mortality_chance(self, previous_simulation: SimulationRun):
 
-        # The mortality rate is dependent on the infection rate (more infected people, more likely that people die)
-        # Changing the mortality chances when the infection rate is not stabled will lead to a lot of unnecessary
-        # adjustments, so we only do so when the infection rate is stable.
         previous_simulation_deaths: int = previous_simulation.get_deaths()
         mortality_fitness = self.__calculate_benchmark_fitness(previous_simulation_deaths, constants.REPORTED_DEATHS, False)
 
