@@ -166,6 +166,14 @@ def __handle_healthy_person(person: Person, pos_y: int, pos_x: int) -> None:
 
 
 def __create_health_value_array() -> ndarray:
+    """
+    We need an array of integer vaLues to draw the simulation visualisation.
+    Here we iterate through all the current people, retrieve their HealthState value and put them in a new array
+    on the same index as the person object was located in the stateConfig.
+
+    :return: Array with integer values based on the stateConfig Persons HealthState values
+    """
+
     global stateConfig
     health_values: ndarray = zeros([constants.AREA_DIMENSIONS, constants.AREA_DIMENSIONS], int)
 
@@ -184,5 +192,5 @@ def __update_current_run() -> None:
     currentRun.set_deaths(totalDead)
     currentRun = fitnessUtility.calculate_and_update_fitness(currentRun, timeStep)
 
-
+# Run the simulation
 pycx.GUI().start(previousRuns, func=[initialize, observe, update, adjust, evolve])
