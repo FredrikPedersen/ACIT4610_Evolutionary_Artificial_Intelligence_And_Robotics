@@ -25,6 +25,8 @@ class SimulationAdjustment:
         if SimulationAdjustment.__instance is None:
             SimulationAdjustment()
 
+        return SimulationAdjustment.__instance
+
     def __init__(self):
         if SimulationAdjustment.__instance is not None:
             raise Exception("This is a Singleton class, do not try to instantiate it directly. Use get_instance method!")
