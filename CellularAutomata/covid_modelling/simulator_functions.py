@@ -26,13 +26,12 @@ fitnessUtility: FitnessUtility = FitnessUtility()
 
 
 def initialize() -> None:
-    global timeStep, stateConfig, totalInfected, totalDead, totalRecovered, allPeople, currentRun
+    global timeStep, stateConfig, totalInfected, totalDead, totalRecovered, allPeople
     timeStep = 0
     totalInfected = 0
     totalDead = 0
     totalRecovered = 0
     allPeople = []
-    currentRun = SimulationRun(len(allPeople), totalDead, totalInfected)
 
     # numpy arrays does not support objects, using a standard 2D-array instead
     stateConfig = [[Person for i in range(constants.AREA_DIMENSIONS)] for j in range(constants.AREA_DIMENSIONS)]
@@ -69,6 +68,9 @@ def observe() -> None:
 def update() -> None:
     global timeStep, stateConfig, currentRun
     timeStep += 1
+
+    if timeStep == 1:
+        currentRun = SimulationRun(len(allPeople), totalDead, totalInfected)
 
     for posX in range(constants.AREA_DIMENSIONS):
         for posY in range(constants.AREA_DIMENSIONS):
