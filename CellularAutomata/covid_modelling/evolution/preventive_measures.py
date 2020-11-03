@@ -24,8 +24,8 @@ class PreventiveMeasures:
     def update(self):
         self.__preventive_measures = []
         self.__preventive_measures.append(
-        self.PreventiveMeasure(constants.MASK_MEASURE, 0.5, Group.Everyone, variables.PERCENTAGE_USING_MASKS))
-        self.__preventive_measures.append(self.PreventiveMeasure(constants.SOCIAL_DISTANCE_MEASURE, 0.4, Group.Everyone, variables.PERCENTAGE_SOCIAL_DISTANCING))
+        self.PreventiveMeasure(constants.MASK_MEASURE, 0.4, Group.Everyone, variables.PERCENTAGE_USING_MASKS))
+        self.__preventive_measures.append(self.PreventiveMeasure(constants.SOCIAL_DISTANCE_MEASURE, 0.5, Group.Everyone, variables.PERCENTAGE_SOCIAL_DISTANCING))
 
         if variables.MANDATORY_ISOLATION:
             self.__preventive_measures.append(self.PreventiveMeasure(constants.ISOLATION_MEASURE, 1.0, Group.Infected))
@@ -36,7 +36,7 @@ class PreventiveMeasures:
     class PreventiveMeasure:
 
         def __init__(self, name: str, inconvenience_weight: float, group_affected: Group, percentage: float = 1.0):
-            if inconvenience_weight <= 0.1 or inconvenience_weight > 1.0:
+            if inconvenience_weight < 0.1 or inconvenience_weight > 1.0:
                 raise Exception("Inconvenience Weight may only be a floating point number between 0.1 and 1.0!")
 
             self.__name = name

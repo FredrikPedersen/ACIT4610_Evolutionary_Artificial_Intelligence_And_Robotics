@@ -19,7 +19,7 @@ class FitnessUtility:
             measure_scores[measure.get_name()] = measure_inconvenience_score
             inconvenience_score += measure_inconvenience_score
 
-        fitness_score = round(inconvenience_score/4 + (simulation_run.get_infected() * 5) + (simulation_run.get_deaths() * 10), 2)
+        fitness_score = round(inconvenience_score + (simulation_run.get_infected() * 30) + (simulation_run.get_deaths() * 50), 2)
         run_scores[time_step] = fitness_score
 
         simulation_run.set_inconvenience_score(measure_scores)
