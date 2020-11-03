@@ -35,7 +35,6 @@ def __benchmark_run_complete():
     work through all scenarios.
     :return:
     """
-
     benchmark_run = False
     variables.PERCENTAGE_USING_MASKS = 0.0
     variables.PERCENTAGE_SOCIAL_DISTANCING = 0.0

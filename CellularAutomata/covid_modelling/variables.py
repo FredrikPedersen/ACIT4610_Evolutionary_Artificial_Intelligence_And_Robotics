@@ -7,7 +7,7 @@ EVOLUTION_COMPLETE: bool = False
 # These numbers have been calculating using the simulation_adjustments algorithm, and are set to give a result as close
 # as possible to the real-world number of infected and dead people when MANDATORY_ISOLATION is enabled,
 # PERCENTAGE_USING_MASKS = 0.22 and PERCENTAGE_SOCIAL_DISTANCING = 0.3.
-INFECTION_CHANCE: float = 0.2000  # Percentage chance for a person to get infected when in contact with a sick person.
+INFECTION_CHANCE: float = 0.1750  # Percentage chance for a person to get infected when in contact with a sick person.
 MORTALITY_CHANCE: float = 0.0231  # Modifier for checking if a person in a risk group will die from the virus
 RECOVERY_CHANCE: float = 0.2  # Arbitrary number used for deciding if a person becomes healthy
 
