@@ -21,7 +21,7 @@ stateConfig: List[List[Person]]
 allPeople: List[Person]
 currentRun: SimulationRun
 previousRuns: List[SimulationRun] = []
-adjustments: SimulationAdjustment = SimulationAdjustment()
+adjustments: SimulationAdjustment = SimulationAdjustment.get_instance()
 fitnessUtility: FitnessUtility = FitnessUtility()
 
 

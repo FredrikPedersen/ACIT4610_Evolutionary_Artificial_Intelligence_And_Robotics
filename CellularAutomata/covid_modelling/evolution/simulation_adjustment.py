@@ -5,8 +5,11 @@ from covid_modelling.results.simulation_run import SimulationRun
 
 
 class SimulationAdjustment:
-    # Simulation adjustments is an evolutionary algorithm meant to adjust the INFECTION_CHANCE and MORTALITY_CHANCE
-    # variables to yield a result as close as possible to real-world numbers of infected and dead.
+    """
+    Simulation adjustments is an evolutionary algorithm meant to adjust the INFECTION_CHANCE and MORTALITY_CHANCE
+    variables to yield a result as close as possible to real-world numbers of infected and dead.
+    """
+    __instance = None
 
     __ADEQUATE_INFECTIONS_DIFFERENCE: int = int(constants.REPORTED_INFECTIONS / 10)
     __ADEQUATE_DEATHS_DIFFERENCE: int = int(constants.REPORTED_DEATHS / 10)
@@ -16,6 +19,17 @@ class SimulationAdjustment:
 
     __highest_mortality_chance: float = 0.5
     __lowest_mortality_chance: float = 0.01
+
+    @staticmethod
+    def get_instance():
+        if SimulationAdjustment.__instance is None:
+            SimulationAdjustment()
+
+    def __init__(self):
+        if SimulationAdjustment.__instance is not None:
+            raise Exception("This is a Singleton class, do not try to instantiate it directly. Use get_instance method!")
+        else:
+            SimulationAdjustment.__instance = self
 
     def adjust_simulation(self, simulation_runs: List[SimulationRun]):
 
