@@ -9,6 +9,15 @@ class FitnessUtility:
     __preventive_measures = PreventiveMeasures.get_instance()
 
     def calculate_and_update_fitness(self, simulation_run: SimulationRun, time_step: int) -> SimulationRun:
+        """
+        Calculates the inconvenience score, then adds it together with the total number of infected and dead at the
+        current timesStep in the simulation run to get the total fitness score.
+
+        :param simulation_run: The Simulation run the fitness should be updated for
+        :param time_step: What is the current timestep
+        :return: the simulation run with updated fitness
+        """
+
         all_measures = self.__preventive_measures.get_preventive_measures()
         inconvenience_score: int = 0
         measure_scores: Dict[str, float] = {}
@@ -28,6 +37,11 @@ class FitnessUtility:
         return simulation_run
 
     def __calculate_inconvenience(self, measure: PreventiveMeasures.PreventiveMeasure, simulation_run: SimulationRun) -> float:
+        """
+        :param measure: What preventive measure the inconvenience score is calculated for
+        :param simulation_run: What simulation run we are working with
+        :return: the inconvenience score for the preventive measure
+        """
         affected_group = measure.get_group_affected()
         affected_people: int = simulation_run.get_total_people()
 

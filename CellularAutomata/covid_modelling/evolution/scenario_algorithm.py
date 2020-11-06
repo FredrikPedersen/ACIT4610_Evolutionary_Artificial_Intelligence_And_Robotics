@@ -5,6 +5,17 @@ benchmark_run: bool = True
 
 
 def evolve() -> bool:
+    """
+    Evolve the the simulation by first disabling all preventive measures, and then implement them for 10% of the
+    population at the time.
+
+    For every run Mandatory Isolation is toggled on/off.
+    Every second run Social Distancing is increased by 10%
+    Every fourth run Social Distancing is reduced by 10% and mask usage increased by 10%.
+
+    :return: boolean value indicating if all evolution scenarios have been completed
+    """
+
     global counter
 
     if benchmark_run:
@@ -33,7 +44,6 @@ def __benchmark_run_complete():
     The default configuration of the simulation is set to give values roughly equal to the pandemic's behaviour in
     Norway. After the initial run (the benchmark run), set all values for preventive measures to 0 or false so we can
     work through all scenarios.
-    :return:
     """
     benchmark_run = False
     variables.PERCENTAGE_USING_MASKS = 0.0

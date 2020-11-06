@@ -4,6 +4,14 @@ from covid_modelling.evolution.group import Group
 
 
 class PreventiveMeasures:
+    """
+    Singleton class containing a list of the currently preventive measures which the simulation has been made to
+    take into account.
+
+    The class has been made into a Singleton to prevent multiple instantiations of the class being updated separately,
+    leading to concurrency errors.
+    """
+
     __instance = None
 
     @staticmethod

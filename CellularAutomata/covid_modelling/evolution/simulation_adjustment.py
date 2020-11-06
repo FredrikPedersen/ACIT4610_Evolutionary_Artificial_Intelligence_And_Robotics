@@ -34,13 +34,12 @@ class SimulationAdjustment:
             SimulationAdjustment.__instance = self
 
     def adjust_simulation(self, simulation_runs: List[SimulationRun]):
-
         previous_simulation: SimulationRun = simulation_runs[len(simulation_runs) - 1]
 
         if self.__adjust_infection_chance(previous_simulation) and self.__adjust_mortality_chance(previous_simulation):
             variables.ADJUSTMENTS_ENABLED = False
 
-    # evolve_simulation
+    # adjust_simulation
 
     def __calculate_benchmark_fitness(self, value: int, benchmark_value: int, absolute=True) -> int:
         if absolute:
