@@ -7,7 +7,7 @@ actual_death_rate = []
 tested_death_rate = []    
 def adjust_rate(dr):
     global actual_death_rate, tested_death_rate
-    actual_death_rate.append(dr * 100)
+    actual_death_rate.append(dr*100)
     tested_death_rate.append(constants.death_rate)
     constants.death_rate -= 0.01
     if constants.death_rate <= 0:
@@ -19,6 +19,7 @@ def adjust_rate(dr):
 def run_adjustment():
     constants.amount_of_tests = 10 # should be 100 for higher accurecy but will take a long time
     constants.death_rate = 0.1
+    variables.runs_to_avg = 1 # lower accurecy but faster
     
 def adjustment_graph():
     global actual_death_rate, tested_death_rate

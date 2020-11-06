@@ -26,7 +26,7 @@ if adjust and variables.adjustment_complete == 0:
 
 if evolve_mask or evolve_social and variables.evolve_complete == 0:
     run_fitness_benchmark()
-    
+    variables.runs_to_avg = 1 #lower accurecy but saves time
     
 
 class agent:
@@ -139,7 +139,7 @@ def observe():
         if variables.counter >= variables.runs_to_avg:
             create_avg()
             if adjust:
-                adjust_rate(variables.avg_death_rate)
+                adjust_rate(variables.final_death_rate)
             
             elif evolve_mask and evolve_social == False:
                 adjust_mask()

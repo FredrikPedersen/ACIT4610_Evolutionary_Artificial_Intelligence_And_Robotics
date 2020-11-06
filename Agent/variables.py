@@ -12,7 +12,7 @@ counter = 0 # counts amount of finished runs
 
 step_counter = 0 # Counts current step
 
-runs_to_avg = 1 #amount of runs to create an avg
+runs_to_avg = 3 #amount of runs to create an avg
 
 infection_free_day = 0 # The step/day when there are no more infected remaining
 
